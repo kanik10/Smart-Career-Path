@@ -74,3 +74,22 @@ export const updateUserCareerPath = async (req, res) => {
         res.status(404).json({ message: 'User not found' });
     }
 };
+
+
+// @desc    Get user profile
+// @route   GET /api/users/profile
+export const getUserProfile = async (req, res) => {
+  // The user is attached to the request object by the 'protect' middleware
+  const user = await User.findById(req.user._id);
+
+  if (user) {
+    res.json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      department: user.department,
+    });
+  } else {
+    res.status(404).json({ message: 'User not found' });
+  }
+};

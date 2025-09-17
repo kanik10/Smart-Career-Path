@@ -1,8 +1,9 @@
 // src/pages/Login.jsx
 
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom'; // Import Link
+import { useNavigate, Link } from 'react-router-dom';
 import vppcoeLogo from '../assets/vppcoe-logo.png';
+import axios from 'axios';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -14,18 +15,25 @@ export default function Login() {
     console.log(`Toast (${type}): ${message}`);
   };
 
-  const handleAuth = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => {
-      if (email && password) {
-        showToast('Login successful!', 'success');
-        navigate('/dashboard');
-      } else {
-        showToast('Please check your credentials.', 'error');
-      }
+
+    try {
+      const loginData = { email, password };
+      const response = await axios.post('http://localhost:5000/api/users/login', loginData);
+      const { data } = response;
+
+      localStorage.setItem('userInfo', JSON.stringify(data));
+      showToast('Login successful!', 'success');
+      navigate('/dashboard');
+
+    } catch (error) {
+      const message = error.response?.data?.message || "Login failed. Please try again.";
+      showToast(message, "error");
+    } finally {
       setLoading(false);
-    }, 1500);
+    }
   };
 
   return (
@@ -34,40 +42,48 @@ export default function Login() {
         <header className="auth-header">
           <img src={vppcoeLogo} alt="VPPCOE Logo" className="logo" />
           <h1 className="title">Smart Career Path</h1>
-          <p className="description">Login to your VPPCOE student account</p>
+          <p className="description">
+            Login to your VPPCOE student account
+          </p>
         </header>
+
         <main className="auth-content">
-          <form onSubmit={handleAuth} className="auth-form">
+          <form onSubmit={handleLogin} className="auth-form">
             <div className="form-group">
               <label htmlFor="email">Email Address</label>
               <input
-                id="email" type="email" placeholder="Enter your email"
-                value={email} onChange={(e) => setEmail(e.target.value)} required
+                id="email"
+                type="email"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
               />
             </div>
+
             <div className="form-group">
               <label htmlFor="password">Password</label>
               <input
-                id="password" type="password" placeholder="Enter your password"
-                value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6}
+                id="password"
+                type="password"
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={6}
               />
             </div>
+
             <button type="submit" className="btn btn-primary" disabled={loading}>
               {loading ? 'Signing in...' : 'Sign In'}
             </button>
           </form>
-          <div className="separator">
-            <span>OR CONTINUE WITH</span>
-          </div>
-          <button className="btn btn-outline" disabled={loading}>
-            {/* Google Icon SVG */}
-            <svg className="google-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-            Continue with Google
-          </button>
+
+          {/* Google Button and Separator have been removed from here */}
+
           <footer className="auth-footer">
             <p>
               Don't have an account?{' '}
-              {/* --- THIS IS THE FIX --- */}
               <Link to="/register" className="toggle-link">
                 Create account
               </Link>

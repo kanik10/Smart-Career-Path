@@ -9,6 +9,17 @@ const userSchema = mongoose.Schema({
   semester: { type: String, required: true },
   dateOfBirth: { type: Date, required: true },
   careerPath: { type: String, default: null },
+  
+  // --- NEW FIELDS FOR PROFILE PAGE ---
+  profileImage: { type: String, default: '' },
+  skills: { type: [String], default: [] },
+workExperience: { type: [String], default: [] },
+  certifications: { type: [String], default: [] },
+  linkedinUrl: { type: String, default: '' },
+  githubUrl: { type: String, default: '' },
+  portfolioUrl: { type: String, default: '' },
+  resumeUrl: { type: String, default: '' },
+
 }, {
   timestamps: true,
 });

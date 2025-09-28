@@ -6,9 +6,10 @@ import Register from './pages/Register';
 import Quiz from './pages/Quiz';
 import Dashboard from './pages/Dashboard';
 import DashboardLayout from './components/DashboardLayout'; // <-- Import the layout
+import Profile from './pages/Profile';
 
 // Placeholder pages for other routes
-const Profile = () => <div>Profile Page</div>;
+
 const Announcements = () => <div>Announcements Page</div>;
 const Resources = () => <div>Resources Page</div>;
 const Progress = () => <div>Progress Page</div>;

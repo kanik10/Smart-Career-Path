@@ -466,3 +466,20 @@ body {
     padding: 0 1.5rem 1.5rem;
   }
 }
+
+/* Add this to the bottom of src/Auth.css */
+
+.back-button {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  color: var(--color-text-muted);
+}

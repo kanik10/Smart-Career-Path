@@ -129,3 +129,19 @@ body { font-family: 'Poppins', sans-serif; background-color: var(--color-backgro
   height: calc(100vh - var(--header-height));
   overflow-y: auto;
 }
+
+/* Add this to the bottom of src/App.css */
+
+/* Add to bottom of src/App.css */
+.submenu {
+  list-style: none;
+  padding-left: 2rem;
+  margin-top: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.sub-link {
+  font-size: 0.9rem;
+  padding: 0.5rem 1rem;
+}

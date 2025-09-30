@@ -1,0 +1,25 @@
+/* src/AdminDashboard.css */
+.admin-dashboard { display: flex; flex-direction: column; gap: 1.5rem; }
+.admin-header h1 { font-size: 1.8rem; font-weight: 600; color: var(--color-text); }
+.admin-header p { color: var(--color-text-muted); }
+.admin-stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; }
+.admin-stat-card { background-color: var(--color-surface); border-radius: var(--border-radius); padding: 1.5rem; display: flex; align-items: center; gap: 1.5rem; border: 1px solid var(--color-border); }
+.stat-icon { width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; }
+.stat-icon.users { background-color: #5c6bc0; }
+.stat-icon.signups { background-color: #66bb6a; }
+.stat-icon.resources { background-color: #ffa726; }
+.stat-info { display: flex; flex-direction: column; }
+.stat-number { font-size: 2rem; font-weight: 700; line-height: 1.2; }
+.stat-label { color: var(--color-text-muted); font-size: 0.9rem; }
+.admin-main-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 1.5rem; }
+.admin-card { background-color: var(--color-surface); border-radius: var(--border-radius); padding: 1.5rem; border: 1px solid var(--color-border); }
+.admin-card h2 { font-size: 1.2rem; font-weight: 600; margin-bottom: 1rem; border-bottom: 1px solid var(--color-border); padding-bottom: 0.75rem; }
+.quick-actions { display: flex; flex-direction: column; gap: 1rem; }
+.action-button { display: flex; align-items: center; gap: 0.75rem; padding: 0.8rem 1rem; border-radius: 8px; background-color: #f8f7f9; border: 1px solid var(--color-border); color: var(--color-text); text-decoration: none; font-weight: 500; transition: all 0.2s ease; }
+.action-button:hover { background-color: var(--vppcoe-primary); color: white; border-color: var(--vppcoe-primary); }
+.user-list table { width: 100%; border-collapse: collapse; }
+.user-list th, .user-list td { text-align: left; padding: 0.8rem; border-bottom: 1px solid var(--color-border); }
+.user-list th { font-weight: 600; font-size: 0.9rem; color: var(--color-text-muted); }
+.user-list td { font-size: 0.9rem; }
+.user-list tr:last-child td { border-bottom: none; }
+@media (max-width: 992px) { .admin-main-grid { grid-template-columns: 1fr; } }

@@ -8,6 +8,7 @@ const userSchema = mongoose.Schema({
   department: { type: String, required: true },
   semester: { type: String, required: true },
   dateOfBirth: { type: Date, required: true },
+  isAdmin: { type: Boolean, default: false },
   careerPath: { type: String, default: null },
   
   // --- NEW FIELDS FOR PROFILE PAGE ---

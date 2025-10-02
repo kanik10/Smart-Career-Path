@@ -24,11 +24,17 @@ export default function Login() {
     if (isAdminLogin) {
       // --- ADMIN LOGIN LOGIC ---
       if (email === 'xyz@gmail.com' && password === '123456') {
+        // Create admin user info
+        const adminUserInfo = {
+          _id: 'admin',
+          name: 'Admin',
+          email: email,
+          isAdmin: true,
+          token: 'admin_token' // This should be a proper JWT token from backend in production
+        };
+        localStorage.setItem('userInfo', JSON.stringify(adminUserInfo));
         showToast('Admin login successful!', 'success');
-        
-        // --- THIS IS THE FIX ---
-        navigate('/admin/dashboard'); // Changed from '/admin-dashboard'
-
+        navigate('/admin/dashboard');
       } else {
         showToast('Invalid admin credentials.', 'error');
         setLoading(false);

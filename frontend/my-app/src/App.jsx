@@ -13,14 +13,14 @@ import Quiz from './pages/Quiz';
 
 // Student Pages
 import Dashboard from './pages/Dashboard';
-const Profile = () => <div>Profile Page</div>;
-const Announcements = () => <div>Announcements Page</div>;
+import Profile from './pages/Profile';
+import Announcements from './pages/Announcements';
 const Resources = () => <div>Resources Page</div>;
 const Progress = () => <div>Progress Page</div>;
 
-// Admin Pages (Placeholders for now)
+// Admin Pages
 import AdminDashboard from './pages/AdminDashboard';
-const AdminAnnouncements = () => <h1>Manage Announcements</h1>;
+import AdminAnnouncements from './pages/AdminAnnouncements';
 const AdminResources = () => <h1>Manage Resources</h1>;
 const UserManagement = () => <h1>Manage Users</h1>;
 

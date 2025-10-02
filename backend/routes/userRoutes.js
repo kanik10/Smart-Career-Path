@@ -4,7 +4,8 @@ import {
   loginUser,
   updateUserCareerPath,
   getUserProfile,
-  updateUserProfile // 1. Import new controller
+  updateUserProfile,
+  createAdminUser // Import admin creation controller
 } from '../controllers/userController.js';
 import { protect } from '../middleware/authMiddleware.js';
 

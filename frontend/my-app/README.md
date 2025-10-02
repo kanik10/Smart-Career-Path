@@ -1,11 +1,25 @@
-# React + Vite
+# Smart Career Path
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A career guidance platform for VPPCOE students.
 
-Currently, two official plugins are available:
+## Dependencies
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### Backend Dependencies
+- express: ^5.1.0 (Web framework)
+- mongoose: ^8.18.3 (MongoDB ODM)
+- cors: ^2.8.5 (Cross-Origin Resource Sharing)
+- dotenv: ^17.2.3 (Environment variables)
+- express-async-handler: ^1.2.0 (Async error handling)
+- jsonwebtoken: ^9.0.2 (JWT authentication)
+- bcryptjs: ^3.0.2 (Password hashing)
+- mongodb: Latest (MongoDB driver)
+
+### Frontend Dependencies
+- react: ^19.1.1
+- react-dom: ^19.1.1
+- react-router-dom: ^7.9.1
+- axios: ^1.12.2 (HTTP client)
+- lucide-react: ^0.544.0 (Icons)
 
 ## Expanding the ESLint configuration
 

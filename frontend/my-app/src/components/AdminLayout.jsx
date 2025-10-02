@@ -1,6 +1,6 @@
 // src/components/AdminLayout.jsx
 
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom'; // Import useLocation
 import vppcoeLogo from '../assets/vppcoe-logo.png';
 import { LayoutDashboard, Megaphone, BookCopy, Users, LogOut } from 'lucide-react';
 import { useState } from 'react';
@@ -9,16 +9,22 @@ import { useState } from 'react';
 const navItems = [
   { path: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { path: '/admin/announcements', label: 'Announcements', icon: Megaphone },
-  { path: '/admin/resources', label: 'Resources', icon: BookCopy, subPaths: [
+  {
+    path: '/admin/resources', // Base path for checking active state
+    label: 'Resources',
+    icon: BookCopy,
+    subPaths: [
       { path: '/admin/resources/placements', label: 'Placements' },
       { path: '/admin/resources/higher-studies', label: 'Higher Studies' },
       { path: '/admin/resources/entrepreneurship', label: 'Entrepreneurship' },
-  ]},
+    ],
+  },
   { path: '/admin/user-management', label: 'User Management', icon: Users },
 ];
 
 export default function AdminLayout() {
   const navigate = useNavigate();
+  const location = useLocation(); // Get the current location
   const [openSubmenu, setOpenSubmenu] = useState(null);
 
   const handleLogout = () => {
@@ -41,19 +47,34 @@ export default function AdminLayout() {
           <ul className="sidebar-nav">
             {navItems.map((item) => {
               const Icon = item.icon;
+              // Check if a sub-item is active
+              const isParentActive = item.subPaths && location.pathname.startsWith(item.path);
+
               return (
                 <li key={item.path}>
-                  <NavLink
-                    to={item.subPaths ? '#' : item.path}
-                    className="sidebar-nav-link"
-                    onClick={() => handleNavClick(item.label)}
-                  >
-                    <Icon size={20} />
-                    <span>{item.label}</span>
-                  </NavLink>
+                  {item.subPaths ? (
+                    // Render a div for items with sub-menus (like Resources)
+                    <div
+                      className={`sidebar-nav-link ${isParentActive ? 'active' : ''}`}
+                      onClick={() => handleNavClick(item.label)}
+                    >
+                      <Icon size={20} />
+                      <span>{item.label}</span>
+                    </div>
+                  ) : (
+                    // Render a NavLink for regular menu items
+                    <NavLink
+                      to={item.path}
+                      className="sidebar-nav-link"
+                      onClick={() => handleNavClick(item.label)}
+                    >
+                      <Icon size={20} />
+                      <span>{item.label}</span>
+                    </NavLink>
+                  )}
                   {item.subPaths && openSubmenu === item.label && (
                     <ul className="submenu">
-                      {item.subPaths.map(subItem => (
+                      {item.subPaths.map((subItem) => (
                         <li key={subItem.path}>
                           <NavLink to={subItem.path} className="sidebar-nav-link sub-link">
                             {subItem.label}
@@ -69,7 +90,8 @@ export default function AdminLayout() {
         </nav>
       </aside>
 
-      <div className="main-view">
+      {/* ... rest of your component remains the same ... */}
+       <div className="main-view">
         <header className="app-header">
           <div className="header-title-group">
             <img src={vppcoeLogo} alt="VPPCOE Logo" />

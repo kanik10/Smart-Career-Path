@@ -3,7 +3,8 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import mongoose from 'mongoose';
 import userRoutes from './routes/userRoutes.js';
-import todoRoutes from './routes/todoRoutes.js'; // 1. Import todo routes
+import todoRoutes from './routes/todoRoutes.js';
+import announcementRoutes from './routes/announcementRoutes.js';
 
 dotenv.config();
 
@@ -17,7 +18,8 @@ mongoose.connect(process.env.MONGO_URI)
 
 // API Routes
 app.use('/api/users', userRoutes);
-app.use('/api/todos', todoRoutes); // 2. Use todo routes
+app.use('/api/todos', todoRoutes);
+app.use('/api/announcements', announcementRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

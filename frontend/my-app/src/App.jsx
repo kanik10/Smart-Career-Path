@@ -15,8 +15,8 @@ import Quiz from './pages/Quiz';
 import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
 import Announcements from './pages/Announcements';
-const Resources = () => <div>Resources Page</div>;
-const Progress = () => <div>Progress Page</div>;
+import Resources from './pages/Resources';
+import Progress from './pages/Progress';
 
 // Admin Pages
 import AdminDashboard from './pages/AdminDashboard';

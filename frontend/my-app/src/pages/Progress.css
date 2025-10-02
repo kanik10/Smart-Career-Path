@@ -1,0 +1,315 @@
+/* Progress.css - matches attached screenshots */
+:root {
+  --vppcoe-primary: rgba(122, 105, 139, 1);
+  --vppcoe-secondary: rgba(225, 197, 183, 1);
+  --vppcoe-accent: rgba(196, 167, 161, 1);
+  --color-background: #F8F7F9;
+  --color-surface: #FFFFFF;
+  --color-text: #333;
+  --color-text-muted: #6c757d;
+  --color-border: #EAE6EB;
+  --border-radius: 16px;
+}
+
+.progress-page {
+  background: var(--color-background);
+  min-height: 100vh;
+  padding: 2rem 0 1rem 0;
+}
+.progress-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.progress-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--vppcoe-primary);
+}
+.progress-icon {
+  color: var(--vppcoe-primary);
+}
+
+.progress-card {
+  background: var(--color-surface);
+  border-radius: var(--border-radius);
+  box-shadow: 0 2px 8px rgba(44,44,44,0.08);
+  border: 1px solid var(--color-border);
+  margin-bottom: 1.5rem;
+}
+.progress-card-content {
+  padding: 2rem 2rem 1.5rem 2rem;
+}
+.progress-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 1.2rem 2rem 0.5rem 2rem;
+}
+.progress-card-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--vppcoe-primary);
+}
+
+/* Overall Progress */
+.overall-progress {
+  margin-bottom: 2rem;
+}
+.progress-overall-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+.progress-overall-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.progress-trophy {
+  color: #e4b900;
+}
+.progress-overall-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+.progress-overall-desc {
+  font-size: 0.95rem;
+  color: var(--color-text-muted);
+}
+.progress-overall-right {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--vppcoe-primary);
+}
+.progress-overall-percent {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--vppcoe-primary);
+}
+.progress-bar-bg {
+  background: var(--vppcoe-secondary);
+  border-radius: 8px;
+  height: 12px;
+  width: 100%;
+  margin-top: 0.5rem;
+  position: relative;
+}
+.progress-bar-bg.small {
+  height: 8px;
+}
+.progress-bar-fill {
+  background: var(--vppcoe-primary);
+  height: 100%;
+  border-radius: 8px;
+  transition: width 0.4s;
+}
+
+/* Two Column Layout */
+.progress-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+@media (max-width: 1100px) {
+  .progress-columns {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Milestones */
+.milestones {
+  min-width: 0;
+}
+.progress-category-group {
+  margin-bottom: 1.2rem;
+}
+.progress-category-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--vppcoe-primary);
+  margin-bottom: 0.5rem;
+}
+.progress-category-list {
+  border-left: 2px solid var(--vppcoe-secondary);
+  padding-left: 1.2rem;
+}
+.progress-milestone {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 0.7rem 0.5rem;
+  border-radius: 10px;
+  border: 1px solid var(--color-border);
+  margin-bottom: 0.5rem;
+  background: var(--color-surface);
+  transition: background 0.2s;
+}
+.progress-milestone.completed {
+  background: #f6fff6;
+  border-color: #b6e6b6;
+}
+.progress-checkbox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #f3f3f3;
+  border: 1.5px solid var(--vppcoe-primary);
+  margin-top: 2px;
+}
+.progress-checkbox.checked {
+  background: #e6fbe6;
+  border-color: #4caf50;
+  color: #4caf50;
+}
+.progress-checkbox-circle {
+  display: block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #fff;
+}
+.progress-milestone-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.progress-milestone-title {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--color-text);
+}
+.progress-milestone-title.line-through {
+  text-decoration: line-through;
+  color: var(--color-text-muted);
+}
+.progress-milestone-desc {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+}
+
+/* Skills Development */
+.skills {
+  min-width: 0;
+}
+.progress-skill-domain {
+  margin-bottom: 1.5rem;
+}
+.progress-skill-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.3rem;
+}
+.progress-skill-title {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--color-text);
+}
+.progress-skill-badge {
+  background: var(--vppcoe-secondary);
+  color: var(--vppcoe-primary);
+  font-size: 0.95rem;
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 0.2rem 0.8rem;
+}
+.progress-skill-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  margin-top: 0.2rem;
+}
+.progress-skill-mastered {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #4caf50;
+  font-size: 0.95rem;
+  margin-top: 0.3rem;
+}
+
+/* Achievements */
+.achievements {
+  margin-bottom: 0;
+}
+.progress-achievements-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.2rem;
+  padding: 1.5rem 2rem 2rem 2rem;
+}
+@media (min-width: 700px) {
+  .progress-achievements-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+.progress-achievement {
+  border-radius: 12px;
+  border: 1.5px solid var(--color-border);
+  background: #f8f7fa;
+  text-align: center;
+  padding: 1.2rem 0.5rem;
+  opacity: 1;
+  min-width: 0;
+  word-break: break-word;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+.progress-achievement.green {
+  background: #e6fbe6;
+  border-color: #b6e6b6;
+}
+.progress-achievement.blue {
+  background: #e6f2ff;
+  border-color: #b6d6ff;
+}
+.progress-achievement.purple {
+  background: #f6f0ff;
+  border-color: #d6c6ff;
+}
+.progress-achievement.gray {
+  background: #f3f3f3;
+  border-color: #d6d6d6;
+  opacity: 0.6;
+}
+.progress-achievement-icon {
+  display: block;
+  margin: 0 auto 0.5rem auto;
+}
+.progress-achievement-icon.green {
+  color: #4caf50;
+}
+.progress-achievement-icon.blue {
+  color: #1976d2;
+}
+.progress-achievement-icon.purple {
+  color: var(--vppcoe-primary);
+}
+.progress-achievement-icon.gray {
+  color: #bdbdbd;
+}
+.progress-achievement-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 0.2rem;
+  word-break: break-word;
+}
+.progress-achievement-desc {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  word-break: break-word;
+}

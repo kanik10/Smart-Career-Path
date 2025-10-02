@@ -1,25 +1,36 @@
+// src/pages/AdminAnnouncements.jsx
+
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Edit, CheckCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import './AdminDashboard.css';
+import { Edit, CheckCircle, Trash2, PlusCircle, X, Calendar, MapPin } from 'lucide-react';
+import './AdminAnnouncements.css';
+
+const categoryInfo = {
+  placement: { color: 'green' }, drive: { color: 'green' },
+  workshop: { color: 'purple' },
+  internship: { color: 'red' },
+  counselling: { color: 'yellow' },
+  'higher study seminar': { color: 'pink' },
+  seminar: { color: 'blue' },
+  others: { color: 'grey' }
+};
+
+const categories = [
+  'placement', 'internship', 'workshop', 'drive',
+  'counselling', 'higher study seminar', 'seminar', 'others'
+];
+const initialFormState = { title: '', description: '', category: 'placement', date: '', venue: '', rsvpLink: '' };
 
 export default function AdminAnnouncements() {
   const navigate = useNavigate();
   const [announcements, setAnnouncements] = useState([]);
   const [activeTab, setActiveTab] = useState('ongoing');
-  const [error, setError] = useState('');
-  const [newAnnouncement, setNewAnnouncement] = useState({
-    title: '',
-    description: '',
-    category: 'event',
-    date: '',
-    time: '',
-    period: 'AM',
-    venue: '',
-  });
+  const [categoryFilter, setCategoryFilter] = useState('all');
+  const [isFormVisible, setIsFormVisible] = useState(false);
+  const [formState, setFormState] = useState(initialFormState);
   const [editingId, setEditingId] = useState(null);
-  const [editForm, setEditForm] = useState({});
+  const [error, setError] = useState('');
 
   const fetchAnnouncements = async () => {
     try {
@@ -41,252 +52,160 @@ export default function AdminAnnouncements() {
     fetchAnnouncements();
   }, [navigate]);
 
-  const handleCreate = async (e) => {
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormState(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+    const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
     try {
-      const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-      if (!userInfo || !userInfo.token) {
-        setError('You must be logged in');
-        return;
+      if (editingId) {
+        await axios.put(`http://localhost:5000/api/announcements/${editingId}`, formState, config);
+      } else {
+        await axios.post('http://localhost:5000/api/announcements', formState, config);
       }
-      
-      const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-      
-      // Combine date and time with AM/PM
-      const [year, month, day] = newAnnouncement.date.split('-');
-      const [hours, minutes] = newAnnouncement.time.split(':');
-      let hour = parseInt(hours);
-      
-      // Convert to 24-hour format
-      if (newAnnouncement.period === 'PM' && hour < 12) {
-        hour += 12;
-      } else if (newAnnouncement.period === 'AM' && hour === 12) {
-        hour = 0;
-      }
-      
-      const dateTime = new Date(year, month - 1, day, hour, parseInt(minutes));
-      
-      const announcementData = {
-        ...newAnnouncement,
-        date: dateTime.toISOString(),
-      };
-      
-      await axios.post('http://localhost:5000/api/announcements', announcementData, config);
-      setNewAnnouncement({
-        title: '',
-        description: '',
-        category: 'event',
-        date: '',
-        time: '',
-        period: 'AM',
-        venue: '',
-      });
+      resetAndCloseForm();
       fetchAnnouncements();
-    } catch (error) {
-      console.error('Error creating announcement:', error);
-      setError(error.response?.data?.message || 'Failed to create announcement');
+    } catch (err) {
+      setError(err.response?.data?.message || 'An error occurred.');
     }
   };
-
-  const handleUpdate = async (id) => {
-    try {
-      const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-      const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-      await axios.put(`http://localhost:5000/api/announcements/${id}`, editForm, config);
-      setEditingId(null);
-      fetchAnnouncements();
-    } catch (error) {
-      console.error('Error updating announcement:', error);
-    }
-  };
-
+  
   const handleComplete = async (id) => {
-    try {
-      const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-      const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-      await axios.put(`http://localhost:5000/api/announcements/${id}/complete`, {}, config);
-      fetchAnnouncements();
-    } catch (error) {
-      console.error('Error completing announcement:', error);
+    if (window.confirm('Are you sure you want to mark this as completed?')) {
+      try {
+        const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+        const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+        await axios.put(`http://localhost:5000/api/announcements/${id}/complete`, {}, config);
+        fetchAnnouncements();
+      } catch (error) { console.error('Error completing announcement:', error); }
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm('Are you sure you want to permanently delete this announcement?')) {
+      try {
+        const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+        const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+        await axios.delete(`http://localhost:5000/api/announcements/${id}`, config);
+        fetchAnnouncements();
+      } catch (error) { console.error('Error deleting announcement:', error); }
     }
   };
 
   const startEdit = (announcement) => {
     setEditingId(announcement._id);
-    setEditForm(announcement);
+    setFormState({
+      title: announcement.title,
+      description: announcement.description,
+      category: announcement.category,
+      date: new Date(announcement.date).toISOString().slice(0, 16),
+      venue: announcement.venue,
+      rsvpLink: announcement.rsvpLink || '',
+    });
+    setIsFormVisible(true);
+  };
+  
+  const resetAndCloseForm = () => {
+    setFormState(initialFormState);
+    setEditingId(null);
+    setIsFormVisible(false);
+    setError('');
   };
 
-  const filteredAnnouncements = announcements.filter(
-    (a) => a.status === activeTab
-  );
+  const filteredAnnouncements = announcements.filter(a => {
+    const matchesTab = a.status === activeTab;
+    if (!matchesTab) return false;
+    if (categoryFilter === 'all') return true;
+    return a.category === categoryFilter;
+  });
+
+  const ongoingCount = announcements.filter(a => a.status === 'ongoing').length;
+  const completedCount = announcements.filter(a => a.status === 'completed').length;
 
   return (
-    <div className="admin-announcements">
-      <div className="page-header">
-        <h1>Announcements Management</h1>
-        <p>Manage all announcements and updates</p>
+    <div className="admin-announcements-container">
+      <div className="admin-announcements-header">
+        <div>
+          <h1>Announcements Management</h1>
+          <p>Create, update, and manage all student-facing announcements.</p>
+        </div>
+        {!isFormVisible && (
+          <button className="btn-add-new" onClick={() => { setEditingId(null); setFormState(initialFormState); setIsFormVisible(true); }}>
+            <PlusCircle size={16}/> Add New Announcement
+          </button>
+        )}
       </div>
 
-      {/* Tab Navigation */}
-      <div className="tab-navigation">
-        <button
-          className={activeTab === 'ongoing' ? 'active' : ''}
-          onClick={() => setActiveTab('ongoing')}
-        >
-          Ongoing ({announcements.filter(a => a.status === 'ongoing').length})
-        </button>
-        <button
-          className={activeTab === 'completed' ? 'active' : ''}
-          onClick={() => setActiveTab('completed')}
-        >
-          Completed ({announcements.filter(a => a.status === 'completed').length})
-        </button>
-      </div>
-
-      {/* Add New Announcement Form */}
-      <div className="add-announcement-section">
-        <button className="add-button" onClick={() => document.getElementById('newAnnouncementForm').style.display = 'block'}>
-          + Add New Announcement
-        </button>
-        
-        <form id="newAnnouncementForm" style={{display: 'none'}} onSubmit={handleCreate}>
-          {error && <div className="error-message">{error}</div>}
-          <input
-            type="text"
-            placeholder="Title"
-            value={newAnnouncement.title}
-            onChange={(e) => setNewAnnouncement({...newAnnouncement, title: e.target.value})}
-            required
-          />
-          <textarea
-            placeholder="Description"
-            value={newAnnouncement.description}
-            onChange={(e) => setNewAnnouncement({...newAnnouncement, description: e.target.value})}
-            required
-          />
-          <select
-            value={newAnnouncement.category}
-            onChange={(e) => setNewAnnouncement({...newAnnouncement, category: e.target.value})}
-            required
-          >
-            <option value="event">Event</option>
-            <option value="placement">Placement</option>
-            <option value="workshop">Workshop</option>
-            <option value="internship">Internship</option>
-          </select>
-          <div className="datetime-group">
-            <input
-              type="date"
-              value={newAnnouncement.date}
-              onChange={(e) => setNewAnnouncement({...newAnnouncement, date: e.target.value})}
-              required
-            />
-            <div className="time-group">
-              <input
-                type="time"
-                value={newAnnouncement.time}
-                onChange={(e) => setNewAnnouncement({...newAnnouncement, time: e.target.value})}
-                required
-              />
-              <select
-                value={newAnnouncement.period}
-                onChange={(e) => setNewAnnouncement({...newAnnouncement, period: e.target.value})}
-                required
-              >
-                <option value="AM">AM</option>
-                <option value="PM">PM</option>
+      {isFormVisible && (
+        <div className="form-card">
+          <div className="form-header">
+            <h2>{editingId ? 'Edit Announcement' : 'Create New Announcement'}</h2>
+            <button onClick={resetAndCloseForm} className="btn-close-form"><X size={20}/></button>
+          </div>
+          <form onSubmit={handleSubmit} className="announcement-form">
+            {error && <p className="error-message">{error}</p>}
+            <input name="title" value={formState.title} onChange={handleInputChange} placeholder="Title" required />
+            <textarea name="description" value={formState.description} onChange={handleInputChange} placeholder="Description" required />
+            <div className="form-grid">
+              <select name="category" value={formState.category} onChange={handleInputChange} required>
+                {categories.map(cat => <option key={cat} value={cat}>{cat.charAt(0).toUpperCase() + cat.slice(1)}</option>)}
               </select>
+              <input name="venue" value={formState.venue} onChange={handleInputChange} placeholder="Venue" required />
             </div>
-          </div>
-          <input
-            type="text"
-            placeholder="Venue"
-            value={newAnnouncement.venue}
-            onChange={(e) => setNewAnnouncement({...newAnnouncement, venue: e.target.value})}
-            required
-          />
-          <div className="form-buttons">
-            <button type="submit">Create</button>
-            <button type="button" onClick={() => document.getElementById('newAnnouncementForm').style.display = 'none'}>
-              Cancel
-            </button>
-          </div>
-        </form>
+            <div className="form-grid">
+              <input name="date" type="datetime-local" value={formState.date} onChange={handleInputChange} required />
+              <input name="rsvpLink" value={formState.rsvpLink} onChange={handleInputChange} placeholder="RSVP Link (Optional)" />
+            </div>
+            <div className="form-actions">
+              <button type="button" className="btn-secondary" onClick={resetAndCloseForm}>Cancel</button>
+              <button type="submit" className="btn-primary">{editingId ? 'Save Changes' : 'Create Announcement'}</button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      <div className="admin-controls-bar">
+        <div className="toggle-tabs admin-tabs">
+          <button onClick={() => setActiveTab('ongoing')} className={activeTab === 'ongoing' ? 'active' : ''}>Ongoing ({ongoingCount})</button>
+          <button onClick={() => setActiveTab('completed')} className={activeTab === 'completed' ? 'active' : ''}>Completed ({completedCount})</button>
+        </div>
+        <div className="category-filter">
+          <label htmlFor="category-select">Filter by category:</label>
+          <select id="category-select" value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}>
+            <option value="all">All Categories</option>
+            {categories.map(cat => <option key={cat} value={cat}>{cat.charAt(0).toUpperCase() + cat.slice(1)}</option>)}
+          </select>
+        </div>
       </div>
-
-      {/* Announcements List */}
-      <div className="announcements-list">
+      
+      <div className="announcements-list admin-view">
         {filteredAnnouncements.map((announcement) => (
-          <div key={announcement._id} className="announcement-card">
-            <div className="announcement-header">
-              <span className={`tag ${announcement.category}`}>
-                {announcement.category}
-              </span>
-              {activeTab === 'ongoing' && (
-                <div className="actions">
-                  <button onClick={() => startEdit(announcement)} className="icon-button">
-                    <Edit size={18} />
-                    Edit
-                  </button>
-                  <button onClick={() => handleComplete(announcement._id)} className="icon-button">
-                    <CheckCircle size={18} />
-                    Complete
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {editingId === announcement._id ? (
-              <form onSubmit={(e) => { e.preventDefault(); handleUpdate(announcement._id); }}>
-                <input
-                  type="text"
-                  value={editForm.title}
-                  onChange={(e) => setEditForm({...editForm, title: e.target.value})}
-                  required
-                />
-                <textarea
-                  value={editForm.description}
-                  onChange={(e) => setEditForm({...editForm, description: e.target.value})}
-                  required
-                />
-                <select
-                  value={editForm.category}
-                  onChange={(e) => setEditForm({...editForm, category: e.target.value})}
-                  required
-                >
-                  <option value="event">Event</option>
-                  <option value="placement">Placement</option>
-                  <option value="workshop">Workshop</option>
-                  <option value="internship">Internship</option>
-                </select>
-                <input
-                  type="datetime-local"
-                  value={editForm.date}
-                  onChange={(e) => setEditForm({...editForm, date: e.target.value})}
-                  required
-                />
-                <input
-                  type="text"
-                  value={editForm.venue}
-                  onChange={(e) => setEditForm({...editForm, venue: e.target.value})}
-                  required
-                />
-                <div className="form-buttons">
-                  <button type="submit">Save</button>
-                  <button type="button" onClick={() => setEditingId(null)}>Cancel</button>
-                </div>
-              </form>
-            ) : (
-              <>
+          <div key={announcement._id} className="announcement-card admin-card">
+            <div className="admin-card-header">
+              <div>
                 <h3>{announcement.title}</h3>
-                <p>{announcement.description}</p>
-                <div className="announcement-details">
-                  <span>📅 {new Date(announcement.date).toLocaleString()}</span>
-                  <span>📍 {announcement.venue}</span>
-                </div>
-              </>
-            )}
+                <span className={`tag ${categoryInfo[announcement.category]?.color || 'grey'}`}>{announcement.category}</span>
+              </div>
+              <div className="admin-card-actions">
+                {activeTab === 'ongoing' && (
+                  <>
+                    <button onClick={() => startEdit(announcement)}><Edit size={16}/> Edit</button>
+                    <button onClick={() => handleComplete(announcement._id)}><CheckCircle size={16}/> Complete</button>
+                  </>
+                )}
+                <button onClick={() => handleDelete(announcement._id)} className="btn-delete"><Trash2 size={16}/> Delete</button>
+              </div>
+            </div>
+            <p>{announcement.description}</p>
+            <div className="admin-card-details">
+              <span className="detail-item"><Calendar size={14}/> {new Date(announcement.date).toLocaleString('en-IN', { dateStyle: 'long', timeStyle: 'short' })}</span>
+              <span className="detail-item"><MapPin size={14}/> {announcement.venue}</span>
+            </div>
           </div>
         ))}
       </div>

@@ -17,41 +17,35 @@ export default function Login() {
     console.log(`Toast (${type}): ${message}`);
   };
 
+  // --- UNIFIED LOGIN FUNCTION ---
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
 
-    if (isAdminLogin) {
-      // --- ADMIN LOGIN LOGIC ---
-      if (email === 'xyz@gmail.com' && password === '123456') {
-        // Create admin user info
-        const adminUserInfo = {
-          _id: 'admin',
-          name: 'Admin',
-          email: email,
-          isAdmin: true,
-          token: 'admin_token' // This should be a proper JWT token from backend in production
-        };
-        localStorage.setItem('userInfo', JSON.stringify(adminUserInfo));
-        showToast('Admin login successful!', 'success');
+    try {
+      // All login attempts go to the same backend endpoint
+      const loginData = { email, password };
+      const response = await axios.post('http://localhost:5000/api/users/login', loginData);
+      const { data } = response;
+
+      // Store user info (which includes the 'isAdmin' flag) in localStorage
+      localStorage.setItem('userInfo', JSON.stringify(data));
+      showToast('Login successful!', 'success');
+
+      // Check the 'isAdmin' flag from the backend response
+      if (data.isAdmin) {
+        // If user is an admin, navigate to the admin dashboard
         navigate('/admin/dashboard');
       } else {
-        showToast('Invalid admin credentials.', 'error');
-        setLoading(false);
-      }
-    } else {
-      // --- STUDENT LOGIN LOGIC ---
-      try {
-        const loginData = { email, password };
-        const response = await axios.post('http://localhost:5000/api/users/login', loginData);
-        localStorage.setItem('userInfo', JSON.stringify(response.data));
-        showToast('Login successful!', 'success');
+        // If user is a student, navigate to the student dashboard
         navigate('/dashboard');
-      } catch (error) {
-        const message = error.response?.data?.message || "Login failed. Please try again.";
-        showToast(message, "error");
-        setLoading(false);
       }
+
+    } catch (error) {
+      const message = error.response?.data?.message || "Login failed. Please try again.";
+      showToast(message, "error");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -69,6 +63,7 @@ export default function Login() {
             <ArrowLeft size={20} /> Back
           </button>
         )}
+
         <header className="auth-header">
           <img src={vppcoeLogo} alt="VPPCOE Logo" className="logo" />
           <h1 className="title">Smart Career Path</h1>
@@ -76,6 +71,7 @@ export default function Login() {
             {isAdminLogin ? 'Admin Panel - VPPCOE Only' : 'Login to your VPPCOE student account'}
           </p>
         </header>
+
         <main className="auth-content">
           <form onSubmit={handleLogin} className="auth-form">
             <div className="form-group">
@@ -96,6 +92,7 @@ export default function Login() {
               {loading ? 'Signing in...' : (isAdminLogin ? 'Sign In as Admin' : 'Sign In')}
             </button>
           </form>
+
           {!isAdminLogin && (
             <>
               <footer className="auth-footer">

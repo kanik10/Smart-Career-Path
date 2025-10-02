@@ -5,7 +5,7 @@ import {
   updateUserCareerPath,
   getUserProfile,
   updateUserProfile,
-  createAdminUser // Import admin creation controller
+  createAdminUser // This import will now work
 } from '../controllers/userController.js';
 import { protect } from '../middleware/authMiddleware.js';
 
@@ -15,7 +15,11 @@ router.post('/register', registerUser);
 router.post('/login', loginUser);
 router.put('/career-path', updateUserCareerPath);
 
-// 2. Add the PUT method to the /profile route
+// --- ADD THIS NEW ROUTE ---
+// Note: In a real app, you would protect this route so only other admins can create admins
+router.post('/admin', createAdminUser);
+
+
 router.route('/profile')
   .get(protect, getUserProfile)
   .put(protect, updateUserProfile);

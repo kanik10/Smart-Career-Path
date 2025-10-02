@@ -1,0 +1,131 @@
+/* src/AdminAnnouncements.css */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+
+.admin-announcements-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+.admin-announcements-header h1 { font-size: 1.8rem; font-weight: 600; }
+.admin-announcements-header p { color: var(--color-text-muted); }
+.btn-add-new { font-family: 'Poppins', sans-serif; display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1.2rem; background-color: var(--vppcoe-primary); color: white; border: none; border-radius: 8px; font-weight: 500; cursor: pointer; }
+.admin-tabs { margin-bottom: 1.5rem; }
+.announcements-list.admin-view { display: flex; flex-direction: column; gap: 1rem; }
+.announcement-card.admin-card { background-color: var(--color-surface); border-radius: var(--border-radius); padding: 1.5rem; border: 1px solid var(--color-border); }
+.admin-card-header { display: flex; justify-content: space-between; align-items: flex-start; }
+.admin-card-header h3 { font-size: 1.2rem; font-weight: 600; margin-bottom: 0.5rem; }
+.admin-card .tag { margin-top: 0.25rem; }
+.admin-card-actions { display: flex; gap: 0.75rem; }
+.admin-card-actions button { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid var(--color-border); background-color: #f8f9fa; cursor: pointer; }
+.admin-card p { color: var(--color-text-muted); line-height: 1.6; margin: 1rem 0; }
+.admin-card .details { display: flex; gap: 1.5rem; font-size: 0.85rem; color: #718096; }
+.admin-card .details span { display: flex; align-items: center; gap: 0.5rem; }
+
+/* Add these new styles to src/AdminAnnouncements.css */
+
+
+
+.btn-close-form {
+  font-family: 'Poppins', sans-serif;
+  background-color: #f8f9fa;
+  color: #6c757d;
+  border: none;
+  padding-top: 0.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.btn-primary  {
+  font-family: 'Poppins', sans-serif;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-secondary {
+  font-family: 'Poppins', sans-serif;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  background-color: #f8f9fa;
+  cursor: pointer;
+}
+
+.announcement-form 
+{
+  background-color: var(--color-surface);
+  padding: 1.5rem;
+  border-radius: var(--border-radius);
+  border: 1px solid var(--color-border);
+  margin-bottom: 2rem;
+}
+
+
+
+
+
+.admin-controls-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.category-filter {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.category-filter label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+}
+
+.category-filter select {
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  border: none;
+  background-color: var(--color-surface);
+  font-family: 'Poppins', sans-serif;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.category-filter select:hover {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.08);
+}
+
+.category-filter select:focus {
+  outline: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* UI Fix for date/venue details */
+.admin-card-details {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  font-size: 0.85rem;
+  color: #718096;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.admin-card-details .detail-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Adjustments for delete button */
+.admin-card-actions .btn-delete {
+  font-family: 'Poppins', sans-serif;
+  background-color: #f8f9fa;
+  color: #dc3545;
+}
+.admin-card-actions .btn-delete:hover {
+  background-color: #dc3545;
+  color: white;
+}

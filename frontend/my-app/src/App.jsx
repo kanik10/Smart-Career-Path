@@ -21,7 +21,9 @@ import Progress from './pages/Progress';
 // Admin Pages
 import AdminDashboard from './pages/AdminDashboard';
 import AdminAnnouncements from './pages/AdminAnnouncements';
-const AdminResources = () => <h1>Manage Resources</h1>;
+import AdminPlacementResources from './pages/AdminPlacementResources';
+import AdminHigherStudiesResources from './pages/AdminHigherStudiesResources';
+import AdminEntrepreneurshipResources from './pages/AdminEntrepreneurshipResources';
 const UserManagement = () => <h1>Manage Users</h1>;
 
 function App() {
@@ -47,10 +49,9 @@ function App() {
         <Route path="/admin" element={<AdminLayout />}>
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="announcements" element={<AdminAnnouncements />} />
-          <Route path="resources" element={<AdminResources />} />
-          <Route path="resources/placements" element={<div>Manage Placements Resources</div>} />
-          <Route path="resources/higher-studies" element={<div>Manage Higher Studies Resources</div>} />
-          <Route path="resources/entrepreneurship" element={<div>Manage Entrepreneurship Resources</div>} />
+          <Route path="resources/placements" element={<AdminPlacementResources />} />
+          <Route path="resources/higher-studies" element={<AdminHigherStudiesResources />} />
+          <Route path="resources/entrepreneurship" element={<AdminEntrepreneurshipResources />} />
           <Route path="user-management" element={<UserManagement />} />
           {/* This redirects /admin to /admin/dashboard by default */}
           <Route index element={<Navigate to="dashboard" />} />

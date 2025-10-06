@@ -142,31 +142,34 @@ export default function AdminAnnouncements() {
       </div>
 
       {isFormVisible && (
-        <div className="form-card">
-          <div className="form-header">
-            <h2>{editingId ? 'Edit Announcement' : 'Create New Announcement'}</h2>
-            <button onClick={resetAndCloseForm} className="btn-close-form"><X size={20}/></button>
+        <>
+          <div className="form-overlay" />
+          <div className="form-card">
+            <div className="form-header">
+              <h2>{editingId ? 'Edit Announcement' : 'Create New Announcement'}</h2>
+              <button onClick={resetAndCloseForm} className="btn-close-form"><X size={20}/></button>
+            </div>
+            <form onSubmit={handleSubmit} className="announcement-form">
+              {error && <p className="error-message">{error}</p>}
+              <input name="title" value={formState.title} onChange={handleInputChange} placeholder="Title" required />
+              <textarea name="description" value={formState.description} onChange={handleInputChange} placeholder="Description" required />
+              <div className="form-grid">
+                <select name="category" value={formState.category} onChange={handleInputChange} required>
+                  {categories.map(cat => <option key={cat} value={cat}>{cat.charAt(0).toUpperCase() + cat.slice(1)}</option>)}
+                </select>
+                <input name="venue" value={formState.venue} onChange={handleInputChange} placeholder="Venue" required />
+              </div>
+              <div className="form-grid">
+                <input name="date" type="datetime-local" value={formState.date} onChange={handleInputChange} required />
+                <input name="rsvpLink" value={formState.rsvpLink} onChange={handleInputChange} placeholder="RSVP Link (Optional)" />
+              </div>
+              <div className="form-actions">
+                <button type="button" className="btn-secondary" onClick={resetAndCloseForm}>Cancel</button>
+                <button type="submit" className="btn-primary">{editingId ? 'Save Changes' : 'Create Announcement'}</button>
+              </div>
+            </form>
           </div>
-          <form onSubmit={handleSubmit} className="announcement-form">
-            {error && <p className="error-message">{error}</p>}
-            <input name="title" value={formState.title} onChange={handleInputChange} placeholder="Title" required />
-            <textarea name="description" value={formState.description} onChange={handleInputChange} placeholder="Description" required />
-            <div className="form-grid">
-              <select name="category" value={formState.category} onChange={handleInputChange} required>
-                {categories.map(cat => <option key={cat} value={cat}>{cat.charAt(0).toUpperCase() + cat.slice(1)}</option>)}
-              </select>
-              <input name="venue" value={formState.venue} onChange={handleInputChange} placeholder="Venue" required />
-            </div>
-            <div className="form-grid">
-              <input name="date" type="datetime-local" value={formState.date} onChange={handleInputChange} required />
-              <input name="rsvpLink" value={formState.rsvpLink} onChange={handleInputChange} placeholder="RSVP Link (Optional)" />
-            </div>
-            <div className="form-actions">
-              <button type="button" className="btn-secondary" onClick={resetAndCloseForm}>Cancel</button>
-              <button type="submit" className="btn-primary">{editingId ? 'Save Changes' : 'Create Announcement'}</button>
-            </div>
-          </form>
-        </div>
+        </>
       )}
 
       <div className="admin-controls-bar">

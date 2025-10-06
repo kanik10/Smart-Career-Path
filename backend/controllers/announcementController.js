@@ -31,7 +31,24 @@ export const getAnnouncements = asyncHandler(async (req, res) => {
 });
 
 // ... (rest of the controller remains the same)
-export const createAnnouncement = asyncHandler(async (req, res) => { /* ... */ });
+export const createAnnouncement = asyncHandler(async (req, res) => {
+  const { title, description, category, date, venue, rsvpLink } = req.body;
+  if (!title || !description || !category || !date || !venue) {
+    res.status(400);
+    throw new Error('All required fields must be filled');
+  }
+  const announcement = new Announcement({
+    title,
+    description,
+    category,
+    date,
+    venue,
+    rsvpLink,
+    status: 'ongoing'
+  });
+  await announcement.save();
+  res.status(201).json({ message: 'Announcement created', announcement });
+});
 export const updateAnnouncement = asyncHandler(async (req, res) => { /* ... */ });
 export const completeAnnouncement = asyncHandler(async (req, res) => { /* ... */ });
 export const deleteAnnouncement = asyncHandler(async (req, res) => { /* ... */ });

@@ -1,12 +1,15 @@
 // backend/routes/dashboardRoutes.js
 
 import express from 'express';
-import { getDashboardData } from '../controllers/dashboardController.js';
-import { protect } from '../middleware/authMiddleware.js';
+import { getDashboardData, getAdminDashboardStats } from '../controllers/dashboardController.js';
+import { protect, admin } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-// This defines the '/data' part of the URL
+// Student dashboard route
 router.route('/data').get(protect, getDashboardData);
+
+// Admin dashboard route
+router.route('/admin/stats').get(protect, admin, getAdminDashboardStats);
 
 export default router;

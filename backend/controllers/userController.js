@@ -61,7 +61,7 @@ export const loginUser = asyncHandler(async (req, res) => {
 // @desc    Update user's career path
 export const updateUserCareerPath = asyncHandler(async (req, res) => {
   // This should be protected, getting user from token
-  const user = await User.findById(req.user._id);
+    const user = await User.findById(req.user._id); 
   if (user) {
     user.careerPath = req.body.careerPath;
     const updatedUser = await user.save();
@@ -70,10 +70,10 @@ export const updateUserCareerPath = asyncHandler(async (req, res) => {
       careerPath: updatedUser.careerPath,
     });
   } else {
-    res.status(404);
-    throw new Error('User not found');
+    res.status(404).json({ message: 'User not found' });
   }
 });
+
 
 // @desc    Get user profile
 export const getUserProfile = asyncHandler(async (req, res) => {

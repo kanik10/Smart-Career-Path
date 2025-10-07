@@ -21,7 +21,7 @@ router.post('/login', loginUser);
 router.post('/admin', createAdminUser);
 
 // Protected student routes
-router.put('/career-path', updateUserCareerPath); // Note: This should be a protected route
+router.put('/career-path', protect, updateUserCareerPath); // Note: This should be a protected route
 router.route('/profile')
   .get(protect, getUserProfile)
   .put(protect, updateUserProfile);

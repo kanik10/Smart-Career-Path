@@ -8,9 +8,9 @@ import Resource from '../models/resourceModel.js';
 export const getProgressData = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id).populate('completedCourses');
 
-  if (!user || !user.careerPath) {
+  if (!user) {
     res.status(404);
-    throw new Error('User or career path not found');
+    throw new Error('User not found');
   }
 
   // Get all resources for the user's career path
@@ -43,9 +43,10 @@ export const getProgressData = asyncHandler(async (req, res) => {
     target: domainTargets[domain],
   }));
 
-  res.json({
+   res.json({
     completedMilestones: user.completedMilestones,
     skillDomains: skillDomains,
+    careerPath: user.careerPath, // <-- ADD THIS LINE
   });
 });
 

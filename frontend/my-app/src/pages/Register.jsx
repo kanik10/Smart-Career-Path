@@ -6,8 +6,8 @@ import { Eye, EyeOff } from "lucide-react";
 import axios from 'axios'; // Import axios
 
 const departments = [
-  "Computer Engineering", "Information Technology", "Electronics Engineering",
-  "Mechanical Engineering", "Civil Engineering", "Electrical Engineering",
+  "Computer Engineering", "Information Technology", "Artificial Intelligence",
+  "Mechatronics", "Electronics & Computer Science Engineering",
 ];
 
 const semesters = ["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th"];

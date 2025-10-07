@@ -6,44 +6,60 @@ import axios from 'axios';
 import { TrendingUp, Target, Code, CheckCircle, Trophy } from 'lucide-react';
 import './Progress.css';
 
-// This data defines the structure and text of the milestones.
-// The completion status will be fetched from the backend.
-const milestonesData = [
+// --- Milestones are now separated by category ---
+
+const commonMilestones = [
   { id: "1", title: "Complete Profile Setup", description: "Add all required information to your profile", category: "Profile" },
-  { id: "2", title: "Attend Mock Interview", description: "Participate in a practice interview session", category: "Interview Prep" },
   { id: "3", title: "Upload Resume", description: "Upload your latest resume to the portal", category: "Documents" },
-  { id: "4", title: "Complete 5 Coding Challenges", description: "Solve algorithmic problems to improve coding skills", category: "Technical Skills" },
-  { id: "5", title: "Attend Technical Workshop", description: "Participate in any technical workshop or seminar", category: "Learning" },
-  { id: "6", title: "Network with Alumni", description: "Connect with at least 3 VPPCOE alumni", category: "Networking" },
-  { id: "7", title: "Complete Internship Application", description: "Apply for at least one internship opportunity", category: "Career" },
-  { id: "8", title: "Join Study Group", description: "Collaborate with peers in a study group", category: "Collaboration" }
+  { id: "6", title: "Network with Alumni", description: "Connect with at least 3 VPPCOE alumni", category: "Networking" }
 ];
+
+const placementsMilestones = [
+  { id: "2", title: "Attend Mock Interview", description: "Participate in a practice interview session", category: "Interview Prep" },
+  { id: "4", title: "Complete 5 Coding Challenges", description: "Solve algorithmic problems on platforms like LeetCode", category: "Technical Skills" },
+  { id: "7", title: "Apply for 3 Internships", description: "Apply for at least three relevant internship opportunities", category: "Career" }
+];
+
+const higherStudiesMilestones = [
+  { id: "hs1", title: "Take a Mock GRE/GATE Test", description: "Assess your current standing for entrance exams", category: "Exam Prep" },
+  { id: "hs2", title: "Research 5 Universities", description: "Shortlist potential universities for your desired course", category: "Research" },
+  { id: "hs3", title: "Draft Statement of Purpose (SOP)", description: "Write the first draft of your SOP", category: "Application" }
+];
+
+const entrepreneurshipMilestones = [
+  { id: "e1", title: "Draft a Business Plan", description: "Create a one-page business plan for a startup idea", category: "Planning" },
+  { id: "e2", title: "Attend a Startup Pitch Event", description: "Observe how founders pitch their ideas to investors", category: "Networking" },
+  { id: "e3", title: "Read 'The Lean Startup'", description: "Understand the fundamentals of building a lean business", category: "Learning" }
+];
+
 
 export default function Progress() {
   const navigate = useNavigate();
   const [completedMilestones, setCompletedMilestones] = useState([]);
   const [skillDomains, setSkillDomains] = useState([]);
+  const [userCareerPath, setUserCareerPath] = useState(null); // State for user's path
   const [loading, setLoading] = useState(true);
 
-  const fetchData = async () => {
-    try {
-      const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-      if (!userInfo || !userInfo.token) {
-        navigate('/login');
-        return;
-      }
-      const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-      const { data } = await axios.get('http://localhost:5000/api/progress/data', config);
-      setCompletedMilestones(data.completedMilestones || []);
-      setSkillDomains(data.skillDomains || []);
-    } catch (error) {
-      console.error("Failed to fetch progress data", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+        if (!userInfo || !userInfo.token) {
+          navigate('/login');
+          return;
+        }
+        const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+        const { data } = await axios.get('http://localhost:5000/api/progress/data', config);
+        
+        setCompletedMilestones(data.completedMilestones || []);
+        setSkillDomains(data.skillDomains || []);
+        setUserCareerPath(data.careerPath); // Set the user's career path
+      } catch (error) {
+        console.error("Failed to fetch progress data", error);
+      } finally {
+        setLoading(false);
+      }
+    };
     fetchData();
   }, [navigate]);
 
@@ -51,9 +67,7 @@ export default function Progress() {
     try {
       const userInfo = JSON.parse(localStorage.getItem('userInfo'));
       const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-      // Send the milestoneId to the backend to be toggled
       const { data } = await axios.put('http://localhost:5000/api/progress/milestones', { milestoneId }, config);
-      // Update the local state with the new list of completed milestones from the server
       setCompletedMilestones(data.completedMilestones);
     } catch (error) {
       console.error('Failed to update milestone', error);
@@ -61,19 +75,27 @@ export default function Progress() {
     }
   };
 
-  const totalMilestones = milestonesData.length;
+  // Dynamically build the list of milestones to display
+  let milestonesToDisplay = [...commonMilestones];
+  if (userCareerPath === 'placements') {
+    milestonesToDisplay = [...commonMilestones, ...placementsMilestones];
+  } else if (userCareerPath === 'higher-studies') {
+    milestonesToDisplay = [...commonMilestones, ...higherStudiesMilestones];
+  } else if (userCareerPath === 'entrepreneurship') {
+    milestonesToDisplay = [...commonMilestones, ...entrepreneurshipMilestones];
+  }
+
+  const totalMilestones = milestonesToDisplay.length;
   const overallProgress = totalMilestones > 0 ? (completedMilestones.length / totalMilestones) * 100 : 0;
 
-  const categoryGroups = milestonesData.reduce((groups, milestone) => {
+  const categoryGroups = milestonesToDisplay.reduce((groups, milestone) => {
     const category = milestone.category;
     if (!groups[category]) groups[category] = [];
     groups[category].push(milestone);
     return groups;
   }, {});
 
-  if (loading) {
-    return <div style={{padding: '2rem'}}>Loading Progress...</div>;
-  }
+  if (loading) return <div style={{padding: '2rem'}}>Loading Progress...</div>;
 
   return (
     <div className="progress-page">

@@ -289,3 +289,56 @@ form textarea {
 .user-list td { font-size: 0.9rem; }
 .user-list tr:last-child td { border-bottom: none; }
 @media (max-width: 992px) { .admin-main-grid { grid-template-columns: 1fr; } }
+
+/* Add these styles to src/AdminDashboard.css */
+
+.chart-card {
+  padding: 2rem !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.leaderboard-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.leaderboard-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem;
+  border-radius: 8px;
+  background-color: #f8f9fa;
+}
+
+.leaderboard-rank {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--vppcoe-primary);
+  width: 30px;
+  text-align: center;
+}
+
+.leaderboard-name {
+  flex-grow: 1;
+  font-weight: 500;
+}
+
+.leaderboard-score {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+}
+
+/* Add this new rule to src/AdminDashboard.css */
+
+.chart-container {
+  position: relative;
+  width: 280px;
+  height: 280px;
+  margin: 1rem auto 0; /* Add some space and center it */
+}

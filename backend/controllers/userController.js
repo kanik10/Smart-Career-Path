@@ -1,5 +1,6 @@
 import User from '../models/userModel.js';
 import jwt from 'jsonwebtoken';
+import asyncHandler from 'express-async-handler';
 
 // Generate JWT Token
 const generateToken = (id) => {
@@ -9,11 +10,12 @@ const generateToken = (id) => {
 };
 
 // @desc    Register a new user
-export const registerUser = async (req, res) => {
+export const registerUser = asyncHandler(async (req, res) => {
   const { name, email, password, department, semester, dateOfBirth } = req.body;
   const userExists = await User.findOne({ email });
   if (userExists) {
-    return res.status(400).json({ message: 'User already exists' });
+    res.status(400);
+    throw new Error('User already exists');
   }
   const user = await User.create({
     name, email, password, department, semester, dateOfBirth
@@ -27,15 +29,22 @@ export const registerUser = async (req, res) => {
       token: generateToken(user._id),
     });
   } else {
-    res.status(400).json({ message: 'Invalid user data' });
+    res.status(400);
+    throw new Error('Invalid user data');
   }
-};
+});
 
-// @desc    Auth user & get token
-export const loginUser = async (req, res) => {
+// @desc    Auth user & get token (UPDATED WITH STATUS CHECK)
+export const loginUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
   const user = await User.findOne({ email });
+
   if (user && (await user.matchPassword(password))) {
+    if (user.status === 'inactive') {
+      res.status(403); // 403 Forbidden
+      throw new Error('Your account has been deactivated. Please contact an administrator.');
+    }
+
     res.json({
       _id: user._id,
       name: user.name,
@@ -44,28 +53,30 @@ export const loginUser = async (req, res) => {
       token: generateToken(user._id),
     });
   } else {
-    res.status(401).json({ message: 'Invalid email or password' });
+    res.status(401);
+    throw new Error('Invalid email or password');
   }
-};
+});
 
 // @desc    Update user's career path
-export const updateUserCareerPath = async (req, res) => {
-  const { userId, careerPath } = req.body;
-  const user = await User.findById(userId);
+export const updateUserCareerPath = asyncHandler(async (req, res) => {
+  // This should be protected, getting user from token
+  const user = await User.findById(req.user._id);
   if (user) {
-    user.careerPath = careerPath;
+    user.careerPath = req.body.careerPath;
     const updatedUser = await user.save();
     res.json({
       _id: updatedUser._id,
       careerPath: updatedUser.careerPath,
     });
   } else {
-    res.status(404).json({ message: 'User not found' });
+    res.status(404);
+    throw new Error('User not found');
   }
-};
+});
 
-// @desc    Get user profile (The single, correct version)
-export const getUserProfile = async (req, res) => {
+// @desc    Get user profile
+export const getUserProfile = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id);
   if (user) {
     res.json({
@@ -87,12 +98,13 @@ export const getUserProfile = async (req, res) => {
       completedCourses: user.completedCourses,
     });
   } else {
-    res.status(404).json({ message: 'User not found' });
+    res.status(404);
+    throw new Error('User not found');
   }
-};
+});
 
 // @desc    Update user profile
-export const updateUserProfile = async (req, res) => {
+export const updateUserProfile = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id);
   if (user) {
     user.skills = req.body.skills ?? user.skills;
@@ -104,16 +116,18 @@ export const updateUserProfile = async (req, res) => {
     const updatedUser = await user.save();
     res.json(updatedUser);
   } else {
-    res.status(404).json({ message: 'User not found' });
+    res.status(404);
+    throw new Error('User not found');
   }
-};
+});
 
 // @desc    Create a new admin user
-export const createAdminUser = async (req, res) => {
+export const createAdminUser = asyncHandler(async (req, res) => {
   const { name, email, password, department, semester, dateOfBirth } = req.body;
   const userExists = await User.findOne({ email });
   if (userExists) {
-    return res.status(400).json({ message: 'User already exists' });
+    res.status(400);
+    throw new Error('User already exists');
   }
   const user = await User.create({
     name, email, password, department, semester, dateOfBirth, isAdmin: true
@@ -126,12 +140,13 @@ export const createAdminUser = async (req, res) => {
       isAdmin: user.isAdmin,
     });
   } else {
-    res.status(400).json({ message: 'Invalid user data' });
+    res.status(400);
+    throw new Error('Invalid user data');
   }
-};
+});
 
 // @desc    Enroll user in a course
-export const enrollInCourse = async (req, res) => {
+export const enrollInCourse = asyncHandler(async (req, res) => {
   const { courseId } = req.body;
   const user = await User.findById(req.user._id);
   if (user) {
@@ -141,12 +156,13 @@ export const enrollInCourse = async (req, res) => {
     }
     res.json({ message: 'Enrolled successfully', enrolledCourses: user.enrolledCourses });
   } else {
-    res.status(404).json({ message: 'User not found' });
+    res.status(404);
+    throw new Error('User not found');
   }
-};
+});
 
 // @desc    Drop a course
-export const dropCourse = async (req, res) => {
+export const dropCourse = asyncHandler(async (req, res) => {
   const courseId = req.params.id;
   const user = await User.findById(req.user._id);
   if (user) {
@@ -154,12 +170,13 @@ export const dropCourse = async (req, res) => {
     await user.save();
     res.json({ message: 'Course dropped', enrolledCourses: user.enrolledCourses });
   } else {
-    res.status(404).json({ message: 'User not found' });
+    res.status(404);
+    throw new Error('User not found');
   }
-};
+});
 
 // @desc    Mark a course as completed
-export const completeCourse = async (req, res) => {
+export const completeCourse = asyncHandler(async (req, res) => {
   const { courseId } = req.body;
   const user = await User.findById(req.user._id);
   if (user) {
@@ -174,6 +191,7 @@ export const completeCourse = async (req, res) => {
       completedCourses: user.completedCourses,
     });
   } else {
-    res.status(404).json({ message: 'User not found' });
+    res.status(404);
+    throw new Error('User not found');
   }
-};
+});

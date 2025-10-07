@@ -9,6 +9,9 @@ const userSchema = mongoose.Schema({
   semester: { type: String, required: true },
   dateOfBirth: { type: Date, required: true },
   isAdmin: { type: Boolean, default: false },
+  
+  status: { type: String, default: 'active', enum: ['active', 'inactive'] },
+  
   careerPath: { type: String, default: null },
   profileImage: { type: String, default: '' },
   skills: { type: [String], default: [] },

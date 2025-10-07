@@ -75,22 +75,8 @@ export default function Dashboard() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="loading-container">
-        <div className="loading-spinner"></div>
-        <p>Loading your dashboard...</p>
-      </div>
-    );
-  }
-
-  if (!dashboardData) {
-    return (
-      <div className="error-container">
-        <p>Failed to load dashboard data. Please try again.</p>
-        <button onClick={fetchData} className="retry-button">Retry</button>
-      </div>
-    );
+  if (loading || !dashboardData) {
+    return <div style={{ padding: '2rem' }}>Loading Dashboard...</div>;
   }
 
   // Destructure the data from our single API call
@@ -150,18 +136,12 @@ export default function Dashboard() {
         <div className="card">
           <h3 className="card-title"><Lightbulb size={20} /> Current Focus</h3>
           <div className="focus-list">
-            {Array.isArray(currentFocus) ? (
-              currentFocus.map(focus => (
-                <div key={focus._id} className="focus-item">
-                  <h4>{focus.title}</h4>
-                  <span className="domain-badge">{focus.domain}</span>
-                </div>
-              ))
-            ) : (
-              <div className="focus-item">
-                <p>No focus items available. Please complete your career assessment.</p>
+            {currentFocus.map(course => (
+              <div key={course._id} className="focus-item">
+                <h4>{course.title}</h4> {/* Use .title from Resource model */}
+                <span className="domain-badge">{course.domain}</span>
               </div>
-            )}
+            ))}
           </div>
         </div>
       </div>

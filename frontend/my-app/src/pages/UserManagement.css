@@ -175,6 +175,42 @@ td {
   background-color: #dee2e6;
 }
 
+/* Career Path Dropdown Styles */
+.career-path-select {
+  width: 180px;
+  padding: 0.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius);
+  background-color: white;
+  font-size: 0.9rem;
+  color: var(--color-text);
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.career-path-select:hover {
+  border-color: #adb5bd;
+}
+
+.career-path-select:focus {
+  outline: none;
+  border-color: #4dabf7;
+  box-shadow: 0 0 0 2px rgba(77, 171, 247, 0.2);
+}
+
+.career-path-select option {
+  padding: 0.5rem;
+}
+
+.career-path-select option:disabled {
+  color: var(--color-text-muted);
+}
+
+/* Adjust table cell padding for career path column */
+td .career-path-select {
+  margin: -0.25rem 0;
+}
+
 @media (max-width: 1200px) {
   .stats-section {
     grid-template-columns: repeat(2, 1fr);

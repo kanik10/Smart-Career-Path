@@ -19,6 +19,8 @@ export default function AdminResourceCategoryPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
   const [domainFilter, setDomainFilter] = useState('all');
+  const [file, setFile] = useState(null); // State for the file upload
+  const [uploading, setUploading] = useState(false); // Add uploading state
 
   const fetchResources = async () => {
     setLoading(true);
@@ -46,9 +48,7 @@ export default function AdminResourceCategoryPage() {
     setError('');
   };
 
-  const closeModal = () => {
-    setIsModalOpen(false);
-  };
+  // Removed duplicate closeModal function
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -58,24 +58,54 @@ export default function AdminResourceCategoryPage() {
   const handleCreateResource = async (e) => {
     e.preventDefault();
     setError('');
+    let resourceUrl = formState.url;
+
     try {
+      if (resourceType === 'material') {
+        if (!file) {
+          setError('Please select a file to upload.');
+          return;
+        }
+        setUploading(true);
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+        const config = { headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${userInfo.token}` } };
+        const { data } = await axios.post('/api/upload', formData, config);
+        resourceUrl = data.path;
+        setUploading(false);
+      }
+
       const userInfo = JSON.parse(localStorage.getItem('userInfo'));
       const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-      
+
       const newResource = {
         ...formState,
+        url: resourceUrl,
         type: resourceType,
         careerPath: careerPath,
       };
 
       await axios.post('http://localhost:5000/api/resources', newResource, config);
-      
+
       fetchResources();
-      closeModal();
+      setIsModalOpen(false);
+      setFile(null);
+      setFormState(initialFormState);
+      setError('');
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to create resource.');
     }
   };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setFile(null); // Reset file state on close
+    setFormState(initialFormState);
+    setError('');
+  };
+
 
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this resource permanently?')) {
@@ -153,12 +183,21 @@ export default function AdminResourceCategoryPage() {
                   <input name="thumbnailUrl" value={formState.thumbnailUrl} onChange={handleInputChange} placeholder="Thumbnail Image URL (Optional)" />
                 </>
               )}
+              {/* SIMPLIFIED FORM FOR STUDY MATERIALS */}
+              {resourceType === 'material' && (
+                <>
+                  <div className="file-input-container">
+                    <label htmlFor="file-upload">Upload File (PDF, Notes, etc.)</label>
+                    <input id="file-upload" type="file" onChange={(e) => setFile(e.target.files[0])} required />
+                  </div>
+                </>
+              )}
 
-              <input name="url" value={formState.url} onChange={handleInputChange} placeholder="Resource URL / Download Link" required />
-              
               <div className="form-actions">
                 <button type="button" className="btn-secondary" onClick={closeModal}>Cancel</button>
-                <button type="submit" className="btn-primary">Add Resource</button>
+                <button type="submit" className="btn-primary" disabled={uploading}>
+                  {uploading ? 'Uploading...' : 'Add Resource'}
+                </button>
               </div>
             </form>
           </div>

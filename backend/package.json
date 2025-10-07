@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "start": "nodemon --env-file=.env server.js",
-  "data:import": "node --env-file=.env seeder.js data/all_resources.json",
-  "data:destroy": "node --env-file=.env seeder.js -d"
+    "data:import": "node --env-file=.env seeder.js data/all_resources.json",
+    "data:destroy": "node --env-file=.env seeder.js -d"
   },
   "keywords": [],
   "author": "",
@@ -20,7 +20,8 @@
     "express-async-handler": "^1.2.0",
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.20.0",
-    "mongoose": "^8.18.3"
+    "mongoose": "^8.18.3",
+    "multer": "^2.0.2"
   },
   "devDependencies": {
     "nodemon": "^3.1.10"

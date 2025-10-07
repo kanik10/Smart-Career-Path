@@ -23,7 +23,7 @@ import Progress from './pages/Progress';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminAnnouncements from './pages/AdminAnnouncements';
 import AdminResourceCategoryPage from './pages/AdminResourceCategoryPage'; 
-const UserManagement = () => <h1>Manage Users</h1>;
+import UserManagement from './pages/UserManagement';
 
 
 function App() {

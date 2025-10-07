@@ -12,6 +12,7 @@ import resourceRoutes from './routes/resourceRoutes.js';
 import uploadRoutes from './routes/uploadRoutes.js';
 import dashboardRoutes from './routes/dashboardRoutes.js';
 import progressRoutes from './routes/progressRoutes.js';
+import userManagementRoutes from './routes/userManagementRoutes.js';
 
 // dotenv.config(); // REMOVED - This is no longer needed
 
@@ -28,6 +29,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/todos', todoRoutes);
 app.use('/api/announcements', announcementRoutes);
 app.use('/api/resources', resourceRoutes);
+app.use('/api/admin', userManagementRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/progress', progressRoutes);

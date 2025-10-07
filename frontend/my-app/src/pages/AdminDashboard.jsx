@@ -7,7 +7,18 @@ import axios from 'axios';
 import { PieChart, Pie, Cell, Legend, ResponsiveContainer, Tooltip } from 'recharts';
 import './AdminDashboard.css';
 
-const COLORS = ['#8884d8', '#e2d8f3', '#ffa07a'];
+const COLORS = ['#4299e1', '#48bb78', '#f6ad55']; // Updated colors for better visibility
+
+const CustomTooltip = ({ active, payload }) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="custom-tooltip">
+        <p className="label">{`${payload[0].name}: ${payload[0].value}%`}</p>
+      </div>
+    );
+  }
+  return null;
+};
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -19,6 +30,7 @@ export default function AdminDashboard() {
     higherStudies: 0,
     entrepreneurship: 0
   });
+  const [leaderboard, setLeaderboard] = useState([]);
   const [recentUsers, setRecentUsers] = useState([]);
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -47,6 +59,7 @@ export default function AdminDashboard() {
             entrepreneurship: 0
           });
           setRecentUsers(data.recentUsers || []);
+          setLeaderboard(data.leaderboard || []);
           setLoading(false);
         } else {
           throw new Error('Invalid data structure received from server');
@@ -113,15 +126,44 @@ export default function AdminDashboard() {
                   outerRadius={80}
                   paddingAngle={5}
                   dataKey="value"
+                  labelLine={false}
                 >
                   {pieData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index]} />
                   ))}
                 </Pie>
-                <Tooltip />
-                <Legend />
+                <Tooltip content={<CustomTooltip />} />
+                <Legend formatter={(value) => <span style={{ color: '#4a5568' }}>{value}</span>} />
               </PieChart>
             </ResponsiveContainer>
+          </div>
+        </div>
+
+        <div className="admin-card">
+          <h2>Student Leaderboard</h2>
+          <div className="leaderboard">
+            {leaderboard.length > 0 ? (
+              <table className="leaderboard-table">
+                <thead>
+                  <tr>
+                    <th>Rank</th>
+                    <th>Student Name</th>
+                    <th>Courses Completed</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {leaderboard.map((student, index) => (
+                    <tr key={student._id}>
+                      <td className="rank">#{index + 1}</td>
+                      <td>{student.name}</td>
+                      <td className="courses-count">{student.completedCoursesCount}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <p className="no-data">No leaderboard data available yet.</p>
+            )}
           </div>
         </div>
 
@@ -134,7 +176,7 @@ export default function AdminDashboard() {
             <Link to="/admin/announcements" className="action-button">
               <Bell size={20} /> Post Announcement
             </Link>
-            <Link to="/admin/resources" className="action-button">
+            <Link to="/admin/resources/placements" className="action-button">
               <BookOpen size={20} /> Update Resources
             </Link>
           </div>

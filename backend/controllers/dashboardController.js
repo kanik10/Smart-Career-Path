@@ -9,7 +9,71 @@ import Resource from '../models/resourceModel.js';
 // @route   GET /api/dashboard/data
 // @access  Private
 export const getDashboardData = asyncHandler(async (req, res) => {
-  // ... existing student dashboard code ...
+    const userId = req.user._id;
+
+    // Fetch user profile data
+    const userProfile = await User.findById(userId)
+        .select('-password')
+        .lean();
+
+    // Fetch user's todos
+    const todos = await Todo.find({ user: userId })
+        .sort({ createdAt: -1 })
+        .lean();
+
+    // Calculate statistics
+    const stats = {
+        coursesEnrolled: userProfile.enrolledCourses?.length || 0,
+        coursesCompleted: userProfile.completedCourses?.length || 0,
+        certificates: userProfile.certifications?.length || 0
+    };
+
+    // Get current focus based on career path and progress
+    let currentFocus = [];
+    if (userProfile.careerPath === 'placement') {
+        currentFocus = [
+            { _id: '1', title: 'Resume Building', domain: 'Career Development' },
+            { _id: '2', title: 'Interview Preparation', domain: 'Soft Skills' },
+            { _id: '3', title: 'Technical Interview Practice', domain: 'Technical' }
+        ];
+    } else if (userProfile.careerPath === 'higher-studies') {
+        currentFocus = [
+            { _id: '1', title: 'Entrance Exam Preparation', domain: 'Academic' },
+            { _id: '2', title: 'Research Paper Reading', domain: 'Research' },
+            { _id: '3', title: 'University Selection', domain: 'Planning' }
+        ];
+    } else if (userProfile.careerPath === 'entrepreneurship') {
+        currentFocus = [
+            { _id: '1', title: 'Business Plan Development', domain: 'Planning' },
+            { _id: '2', title: 'Market Research', domain: 'Research' },
+            { _id: '3', title: 'Networking Skills', domain: 'Soft Skills' }
+        ];
+    } else {
+        currentFocus = [
+            { _id: '1', title: 'Complete Career Assessment', domain: 'Planning' },
+            { _id: '2', title: 'Explore Career Paths', domain: 'Research' }
+        ];
+    }
+
+    // Get recent achievements
+    const recentAchievements = [
+        ...userProfile.completedCourses?.slice(-3).map(course => `Completed ${course}`) || [],
+        ...userProfile.certifications?.slice(-3).map(cert => `Earned ${cert}`) || []
+    ].slice(0, 3);
+
+    // Send response
+    res.json({
+        userProfile: {
+            name: userProfile.name,
+            department: userProfile.department,
+            profilePicture: userProfile.profilePicture,
+            email: userProfile.email
+        },
+        stats,
+        currentFocus,
+        recentAchievements,
+        todos
+    });
 });
 
 // @desc    Get admin dashboard statistics
@@ -47,6 +111,17 @@ export const getAdminDashboardStats = asyncHandler(async (req, res) => {
         .sort({ createdAt: -1 })
         .limit(5)
         .select('name email createdAt');
+        
+    // Get leaderboard data (top 5 students by completed courses)
+    const leaderboard = await User.aggregate([
+        { $match: { isAdmin: false } },
+        { $project: {
+            name: 1,
+            completedCoursesCount: { $size: { $ifNull: ['$completedCourses', []] } }
+        }},
+        { $sort: { completedCoursesCount: -1 } },
+        { $limit: 5 }
+    ]);
 
     res.json({
         stats: {
@@ -55,6 +130,7 @@ export const getAdminDashboardStats = asyncHandler(async (req, res) => {
             resourcesCount
         },
         careerPathDistribution: distribution,
+        leaderboard,
         recentUsers: recentUsers.map(user => ({
             id: user._id,
             name: user.name,

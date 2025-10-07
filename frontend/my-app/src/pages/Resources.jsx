@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Clock, User, Download } from 'lucide-react';
+import { Clock, User, Download, FileText } from 'lucide-react';
 import './Resources.css';
 
 // Sub-component for interactive Course cards
@@ -11,7 +11,6 @@ function CourseCard({ course, userData, onEnroll, onComplete, onDrop }) {
   const isEnrolled = userData.enrolledCourses?.includes(course._id);
   const isCompleted = userData.completedCourses?.includes(course._id);
 
-   
   return (
     <div className="course-card">
       <img src={course.thumbnailUrl || 'https://via.placeholder.com/400x225'} alt={course.title} className="card-thumbnail" />
@@ -43,12 +42,21 @@ function CourseCard({ course, userData, onEnroll, onComplete, onDrop }) {
 
 // Sub-component for simple Material cards
 function MaterialCard({ material }) {
+  const fullDownloadUrl = `http://localhost:5000${material.url}`;
+
   return (
     <div className="material-card">
-      <h3>{material.title}</h3>
-      <span className="domain-tag">{material.domain}</span>
-      <p>{material.description}</p>
-      <a href={material.url} target="_blank" rel="noopener noreferrer" className="btn-download">
+      <div className="material-card-header">
+        <div className="material-icon-wrapper">
+          <FileText size={24} />
+        </div>
+        <div className="material-title-group">
+          <h3>{material.title}</h3>
+          <span className="domain-tag">{material.domain}</span>
+        </div>
+      </div>
+      <p className="material-description">{material.description}</p>
+      <a href={fullDownloadUrl} target="_blank" rel="noopener noreferrer" className="btn-download">
         <Download size={16} /> Download
       </a>
     </div>
@@ -60,9 +68,8 @@ export default function Resources() {
   const [activeTab, setActiveTab] = useState('courses');
   const [resources, setResources] = useState([]);
   const [userData, setUserData] = useState({ enrolledCourses: [], completedCourses: [] });
+  const [domainFilter, setDomainFilter] = useState('all');
   const navigate = useNavigate();
-   const [domainFilter, setDomainFilter] = useState('all');
-
 
   const fetchAllData = async () => {
     try {
@@ -120,48 +127,43 @@ export default function Resources() {
       } catch (error) { console.error("Failed to drop course", error); }
     }
   };
-
+  
   const filteredResources = resources.filter(resource => {
     return domainFilter === 'all' || resource.domain === domainFilter;
   });
 
   const courses = filteredResources.filter(r => r.type === 'course');
   const materials = filteredResources.filter(r => r.type === 'material');
-
-  // Dynamically get the list of unique domains from the fetched resources
   const availableDomains = [...new Set(resources.map(r => r.domain))];
 
- 
-
-
- return (
+  return (
     <div className="resources-container">
       <div className="resources-header">
-        <h1>Resources</h1>
-        <p>Courses and materials tailored to your career path.</p>
-      </div>
-
-      {/* --- NEW CONTAINER FOR CONTROLS --- */}
-      <div className="resource-controls">
-        <div className={`toggle-tabs resource-tabs tab-${activeTab}-active`}>
-          <button onClick={() => setActiveTab('courses')} className={activeTab === 'courses' ? 'active' : ''}>Online Courses</button>
-          <button onClick={() => setActiveTab('materials')} className={activeTab === 'materials' ? 'active' : ''}>Study Materials & Resources</button>
+        <div>
+          <h1>Resources</h1>
+          <p>Courses and materials tailored to your career path.</p>
         </div>
-        
-        <div className="domain-filter-container">
-          <label htmlFor="domain-filter">Filter by domain</label>
-          <select 
-            id="domain-filter"
-            value={domainFilter}
-            onChange={(e) => setDomainFilter(e.target.value)}
-          >
-            <option value="all">All Domains</option>
-            {availableDomains.map(domain => (
-              <option key={domain} value={domain}>{domain}</option>
-            ))}
-          </select>
+        {/* --- CORRECTED CONTAINER FOR CONTROLS --- */}
+        <div className="resource-controls">
+          <div className={`toggle-tabs resource-tabs tab-${activeTab}-active`}>
+            <button onClick={() => setActiveTab('courses')} className={activeTab === 'courses' ? 'active' : ''}>Online Courses ({courses.length})</button>
+            <button onClick={() => setActiveTab('materials')} className={activeTab === 'materials' ? 'active' : ''}>Study Materials ({materials.length})</button>
+          </div>
+          
+          <div className="domain-filter-container">
+            <label htmlFor="domain-filter">Filter by domain</label>
+            <select 
+              id="domain-filter"
+              value={domainFilter}
+              onChange={(e) => setDomainFilter(e.target.value)}
+            >
+              <option value="all">All Domains</option>
+              {availableDomains.map(domain => (
+                <option key={domain} value={domain}>{domain}</option>
+              ))}
+            </select>
+          </div>
         </div>
-      
       </div>
 
       {activeTab === 'courses' && (

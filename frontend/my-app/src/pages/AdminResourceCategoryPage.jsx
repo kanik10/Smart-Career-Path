@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { PlusCircle, Trash2, X } from 'lucide-react';
+import { PlusCircle, Trash2, X, File } from 'lucide-react';
 import './AdminResources.css';
 
 const initialFormState = { title: '', description: '', domain: '', url: '', instructor: '', duration: '', thumbnailUrl: '' };
@@ -16,17 +16,20 @@ export default function AdminResourceCategoryPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [resourceType, setResourceType] = useState('course');
   const [formState, setFormState] = useState(initialFormState);
+  const [file, setFile] = useState(null);
+  const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
   const [domainFilter, setDomainFilter] = useState('all');
-  const [file, setFile] = useState(null); // State for the file upload
-  const [uploading, setUploading] = useState(false); // Add uploading state
 
   const fetchResources = async () => {
     setLoading(true);
     try {
       const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-      if (!userInfo || !userInfo.token) { navigate('/login'); return; }
+      if (!userInfo || !userInfo.token) {
+        navigate('/login');
+        return;
+      }
       const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
       const { data } = await axios.get(`http://localhost:5000/api/resources?careerPath=${careerPath}`, config);
       setResources(data);
@@ -48,7 +51,12 @@ export default function AdminResourceCategoryPage() {
     setError('');
   };
 
-  // Removed duplicate closeModal function
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setFile(null);
+    setFormState(initialFormState);
+    setError('');
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -58,9 +66,14 @@ export default function AdminResourceCategoryPage() {
   const handleCreateResource = async (e) => {
     e.preventDefault();
     setError('');
+    
     let resourceUrl = formState.url;
 
     try {
+      const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+      let config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+      let newResourceData = {};
+
       if (resourceType === 'material') {
         if (!file) {
           setError('Please select a file to upload.');
@@ -69,64 +82,56 @@ export default function AdminResourceCategoryPage() {
         setUploading(true);
         const formData = new FormData();
         formData.append('file', file);
-
-        const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-        const config = { headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${userInfo.token}` } };
-        const { data } = await axios.post('/api/upload', formData, config);
+        
+        const uploadConfig = { headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${userInfo.token}` } };
+        const { data } = await axios.post('http://localhost:5000/api/upload', formData, uploadConfig);
         resourceUrl = data.path;
         setUploading(false);
+        
+        newResourceData = {
+          title: formState.title,
+          domain: formState.domain,
+          url: resourceUrl,
+          description: formState.description || 'Downloadable study material.',
+          type: 'material',
+          careerPath: careerPath,
+        };
+
+      } else { // It's a 'course'
+        newResourceData = {
+          ...formState,
+          type: 'course',
+          careerPath: careerPath,
+        };
       }
-
-      const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-      const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-
-      const newResource = {
-        ...formState,
-        url: resourceUrl,
-        type: resourceType,
-        careerPath: careerPath,
-      };
-
-      await axios.post('http://localhost:5000/api/resources', newResource, config);
-
+      
+      await axios.post('http://localhost:5000/api/resources', newResourceData, config);
+      
       fetchResources();
-      setIsModalOpen(false);
-      setFile(null);
-      setFormState(initialFormState);
-      setError('');
+      closeModal();
     } catch (err) {
+      setUploading(false); // Ensure loading state is reset on error
       setError(err.response?.data?.message || 'Failed to create resource.');
     }
   };
 
-  const closeModal = () => {
-    setIsModalOpen(false);
-    setFile(null); // Reset file state on close
-    setFormState(initialFormState);
-    setError('');
-  };
-
-
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this resource permanently?')) {
-        try {
-            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-            const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-            await axios.delete(`http://localhost:5000/api/resources/${id}`, config);
-            fetchResources();
-        } catch (error) {
-            console.error('Failed to delete resource', error);
-            alert('Failed to delete resource.');
-        }
+      try {
+        const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+        const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+        await axios.delete(`http://localhost:5000/api/resources/${id}`, config);
+        fetchResources();
+      } catch (error) {
+        console.error('Failed to delete resource', error);
+        alert('Failed to delete resource.');
+      }
     }
   };
 
   const title = careerPath.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase());
   const availableDomains = [...new Set(resources.map(r => r.domain))];
-
-  const filteredResources = resources.filter(resource => 
-    domainFilter === 'all' || resource.domain === domainFilter
-  );
+  const filteredResources = resources.filter(resource => domainFilter === 'all' || resource.domain === domainFilter);
 
   return (
     <div className="admin-resources-container">
@@ -171,28 +176,28 @@ export default function AdminResourceCategoryPage() {
             <form onSubmit={handleCreateResource} className="modal-form">
               {error && <p className="error-message">{error}</p>}
               <input name="title" value={formState.title} onChange={handleInputChange} placeholder="Title" required />
-              <textarea name="description" value={formState.description} onChange={handleInputChange} placeholder="Description" required />
               <input name="domain" value={formState.domain} onChange={handleInputChange} placeholder="Domain (e.g., Computer Science)" required />
               
-              {resourceType === 'course' && (
+              {resourceType === 'course' ? (
                 <>
+                  <textarea name="description" value={formState.description} onChange={handleInputChange} placeholder="Description" required />
                   <div className="form-grid">
                     <input name="instructor" value={formState.instructor} onChange={handleInputChange} placeholder="Educator Name" />
                     <input name="duration" value={formState.duration} onChange={handleInputChange} placeholder="Duration (e.g., 40 hours)" />
                   </div>
                   <input name="thumbnailUrl" value={formState.thumbnailUrl} onChange={handleInputChange} placeholder="Thumbnail Image URL (Optional)" />
+                  <input name="url" value={formState.url} onChange={handleInputChange} placeholder="Course URL / Link" required />
                 </>
-              )}
-              {/* SIMPLIFIED FORM FOR STUDY MATERIALS */}
-              {resourceType === 'material' && (
+              ) : (
                 <>
+                  <textarea name="description" value={formState.description} onChange={handleInputChange} placeholder="Short Description" required />
                   <div className="file-input-container">
                     <label htmlFor="file-upload">Upload File (PDF, Notes, etc.)</label>
                     <input id="file-upload" type="file" onChange={(e) => setFile(e.target.files[0])} required />
                   </div>
                 </>
               )}
-
+              
               <div className="form-actions">
                 <button type="button" className="btn-secondary" onClick={closeModal}>Cancel</button>
                 <button type="submit" className="btn-primary" disabled={uploading}>
@@ -205,10 +210,15 @@ export default function AdminResourceCategoryPage() {
       )}
       
       <div className="admin-resource-list">
-        {/* --- FIX #1: Use 'filteredResources' here instead of 'resources' --- */}
         {loading ? <p>Loading resources...</p> : filteredResources.map(resource => (
           <div key={resource._id} className="admin-resource-card">
-            <img src={resource.thumbnailUrl || 'https://via.placeholder.com/150x85'} alt={resource.title} className="resource-card-thumbnail" />
+            {resource.thumbnailUrl ? (
+              <img src={resource.thumbnailUrl} alt={resource.title} className="resource-card-thumbnail" />
+            ) : (
+              <div className="resource-card-icon-placeholder">
+                <File size={32} />
+              </div>
+            )}
             <div className="resource-card-info">
               <h3>{resource.title}</h3>
               <p className="resource-domain-tag">{resource.domain}</p>
@@ -222,7 +232,6 @@ export default function AdminResourceCategoryPage() {
             </div>
           </div>
         ))}
-        {/* --- FIX #2: Check the length of 'filteredResources' here --- */}
         {!loading && filteredResources.length === 0 && <p>No resources found for this filter.</p>}
       </div>
     </div>

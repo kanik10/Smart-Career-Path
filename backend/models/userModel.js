@@ -17,6 +17,7 @@ const userSchema = mongoose.Schema({
   linkedinUrl: { type: String, default: '' },
   githubUrl: { type: String, default: '' },
   portfolioUrl: { type: String, default: '' },
+   completedMilestones: { type: [String], default: [] },
   resumeUrl: { type: String, default: '' },
    enrolledCourses: [{
     type: mongoose.Schema.Types.ObjectId,

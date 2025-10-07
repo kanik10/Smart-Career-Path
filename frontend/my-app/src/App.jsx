@@ -17,7 +17,7 @@ import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
 import Announcements from './pages/Announcements';
 import Resources from './pages/Resources';
-const Progress = () => <div>Progress Page</div>; // This is still a placeholder
+import Progress from './pages/Progress';
 
 // Admin Pages
 import AdminDashboard from './pages/AdminDashboard';

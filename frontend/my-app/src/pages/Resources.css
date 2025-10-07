@@ -259,3 +259,65 @@
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(220, 53, 69, 0.2);
 }
+
+/* Find and replace these rules in src/Resources.css */
+
+.material-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+.material-card {
+  background-color: var(--color-surface);
+  border-radius: var(--border-radius);
+  padding: 1.5rem;
+  border: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+}
+
+.material-card-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.material-icon-wrapper {
+  flex-shrink: 0;
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(122, 105, 139, 0.1);
+  color: var(--vppcoe-primary);
+}
+
+.material-title-group h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.material-description {
+  color: var(--color-text-muted);
+  margin-bottom: 1.5rem;
+  flex-grow: 1; /* Pushes the download button to the bottom */
+}
+
+.btn-download {
+  display: flex; /* Changed from inline-flex */
+  align-items: center;
+  justify-content: center; /* Center content */
+  gap: 0.5rem;
+  padding: 0.7rem; /* Adjusted padding */
+  background-color: var(--vppcoe-primary);
+  color: white;
+  border-radius: 8px;
+  text-decoration: none;
+  width: 100%; /* Make button full-width */
+  font-weight: 500;
+}

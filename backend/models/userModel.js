@@ -18,9 +18,19 @@ const userSchema = mongoose.Schema({
   githubUrl: { type: String, default: '' },
   portfolioUrl: { type: String, default: '' },
   resumeUrl: { type: String, default: '' },
+   enrolledCourses: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Resource'
+  }],
+  completedCourses: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Resource'
+  }],
 }, {
   timestamps: true,
 });
+
+
 
 userSchema.pre('save', async function(next) {
   if (!this.isModified('password')) {

@@ -4,7 +4,9 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "nodemon --env-file=.env server.js"
+    "start": "nodemon --env-file=.env server.js",
+  "data:import": "node --env-file=.env seeder.js data/all_resources.json",
+  "data:destroy": "node --env-file=.env seeder.js -d"
   },
   "keywords": [],
   "author": "",

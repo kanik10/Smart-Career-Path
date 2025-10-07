@@ -64,7 +64,7 @@ export const updateUserCareerPath = async (req, res) => {
   }
 };
 
-// @desc    Get user profile
+// @desc    Get user profile (The single, correct version)
 export const getUserProfile = async (req, res) => {
   const user = await User.findById(req.user._id);
   if (user) {
@@ -83,6 +83,8 @@ export const getUserProfile = async (req, res) => {
       linkedinUrl: user.linkedinUrl,
       githubUrl: user.githubUrl,
       portfolioUrl: user.portfolioUrl,
+      enrolledCourses: user.enrolledCourses,
+      completedCourses: user.completedCourses,
     });
   } else {
     res.status(404).json({ message: 'User not found' });
@@ -128,4 +130,50 @@ export const createAdminUser = async (req, res) => {
   }
 };
 
-// DO NOT ADD 'export default User;' HERE
+// @desc    Enroll user in a course
+export const enrollInCourse = async (req, res) => {
+  const { courseId } = req.body;
+  const user = await User.findById(req.user._id);
+  if (user) {
+    if (!user.enrolledCourses.includes(courseId)) {
+      user.enrolledCourses.push(courseId);
+      await user.save();
+    }
+    res.json({ message: 'Enrolled successfully', enrolledCourses: user.enrolledCourses });
+  } else {
+    res.status(404).json({ message: 'User not found' });
+  }
+};
+
+// @desc    Drop a course
+export const dropCourse = async (req, res) => {
+  const courseId = req.params.id;
+  const user = await User.findById(req.user._id);
+  if (user) {
+    user.enrolledCourses = user.enrolledCourses.filter(id => id.toString() !== courseId);
+    await user.save();
+    res.json({ message: 'Course dropped', enrolledCourses: user.enrolledCourses });
+  } else {
+    res.status(404).json({ message: 'User not found' });
+  }
+};
+
+// @desc    Mark a course as completed
+export const completeCourse = async (req, res) => {
+  const { courseId } = req.body;
+  const user = await User.findById(req.user._id);
+  if (user) {
+    user.enrolledCourses = user.enrolledCourses.filter(id => id.toString() !== courseId);
+    if (!user.completedCourses.includes(courseId)) {
+      user.completedCourses.push(courseId);
+    }
+    await user.save();
+    res.json({ 
+      message: 'Course completed',
+      enrolledCourses: user.enrolledCourses,
+      completedCourses: user.completedCourses,
+    });
+  } else {
+    res.status(404).json({ message: 'User not found' });
+  }
+};

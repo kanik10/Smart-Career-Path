@@ -5,23 +5,31 @@ import {
   updateUserCareerPath,
   getUserProfile,
   updateUserProfile,
-  createAdminUser // This import will now work
+  createAdminUser,
+  // --- ADD THESE MISSING IMPORTS ---
+  enrollInCourse,
+  dropCourse,
+  completeCourse
 } from '../controllers/userController.js';
 import { protect } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
+// Public routes
 router.post('/register', registerUser);
 router.post('/login', loginUser);
-router.put('/career-path', updateUserCareerPath);
-
-// --- ADD THIS NEW ROUTE ---
-// Note: In a real app, you would protect this route so only other admins can create admins
 router.post('/admin', createAdminUser);
 
-
+// Protected student routes
+router.put('/career-path', updateUserCareerPath); // Note: This should be a protected route
 router.route('/profile')
   .get(protect, getUserProfile)
   .put(protect, updateUserProfile);
+
+// Protected course management routes
+router.post('/courses/enroll', protect, enrollInCourse);
+router.delete('/courses/drop/:id', protect, dropCourse);
+router.post('/courses/complete', protect, completeCourse);
+
 
 export default router;

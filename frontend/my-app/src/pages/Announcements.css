@@ -1,8 +1,33 @@
 /* src/Announcements.css */
 
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
-.announcements-header { margin-bottom: 1.5rem; }
-.announcements-header h1 { font-size: 1.8rem; font-weight: 600; }
+.announcements-header { 
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid var(--color-border);
+}
+
+.announcements-header h1 { 
+  font-size: 2rem;
+  font-weight: 700;
+  background: linear-gradient(45deg, var(--vppcoe-primary), #000000);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+  margin-bottom: 0.5rem;
+}
+
+.announcements-header p {
+  background: linear-gradient(45deg, #010101, #64748b);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-size: 1.1rem;
+  max-width: 600px;
+  line-height: 1.6;
+}
 
 .announcement-stats-grid-scrollable { display: flex; overflow-x: auto; gap: 1rem; margin-bottom: 2rem; padding-bottom: 1rem; -ms-overflow-style: none; scrollbar-width: none; }
 .announcement-stats-grid-scrollable::-webkit-scrollbar { display: none; }
@@ -17,6 +42,9 @@
   width: 220px;
   cursor: pointer; /* Make it look clickable */
   transition: all 0.2s ease;
+  margin-top: 0.5rem;
+  margin-left:0.3rem;
+  margin-right: 0.3rem;
 }
 
 .stat-item:hover {
@@ -94,4 +122,53 @@
 
 .stat-item.black h3 {
   color: var(--color-text); /* Uses the main text color for the number */
+}
+
+
+/* Replace your old .toggle-tabs.student-tabs styles with this block */
+
+.toggle-tabs.student-tabs {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Create two equal columns */
+  width: fit-content;
+  background-color: #f1f5f9;
+  border-radius: 12px;
+  padding: 5px;
+}
+
+/* This is the sliding purple indicator */
+.toggle-tabs.student-tabs::before {
+  content: '';
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  height: calc(100% - 10px);
+  width: calc(50% - 5px);
+  background-color: var(--vppcoe-secondaty);
+  border-radius: 8px;
+  transition: transform 0.25s ease-in-out;
+  z-index: 1;
+}
+
+/* Move the indicator when the 'past' tab is active */
+.toggle-tabs.student-tabs.tab-past-active::before {
+  transform: translateX(100%);
+}
+
+.toggle-tabs.student-tabs button {
+  padding: 0.5rem 1.25rem;
+  border: none;
+  background-color: transparent;
+  font-weight: 500;
+  color: rgb(122, 85, 27);
+  cursor: pointer;
+  transition: color 0.25s ease;
+  z-index: 2; /* Place buttons on top of the indicator */
+}
+
+/* Make the active text white */
+.toggle-tabs.student-tabs button.active {
+  color: rgb(59, 48, 0);
+  font-weight: 600;
 }

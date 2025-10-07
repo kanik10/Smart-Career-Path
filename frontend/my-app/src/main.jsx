@@ -6,6 +6,8 @@ import './App.css'
 import './pages/Auth.css';
 import './pages/Dashboard.css';
 import './pages/Profile.css';
+import './pages/AdminResources.css';
+import './pages/Resources.css'; 
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

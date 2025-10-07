@@ -79,7 +79,7 @@ export default function Announcements() {
         })}
       </div>
 
-      <div className="toggle-tabs">
+     <div className={`toggle-tabs student-tabs tab-${activeTab}-active`}>
         <button onClick={() => setActiveTab('upcoming')} className={activeTab === 'upcoming' ? 'active' : ''}>Upcoming Events</button>
         <button onClick={() => setActiveTab('past')} className={activeTab === 'past' ? 'active' : ''}>Past Events</button>
       </div>

@@ -81,7 +81,6 @@ Execute the project
   npm run dev
 ```
 
-The app will start on http://localhost:3000/
 ## Running the App
 
 Open the app and register/login as a student.

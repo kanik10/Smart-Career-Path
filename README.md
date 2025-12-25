@@ -50,7 +50,7 @@ Authentication: JWT Auth
 - @RayyanKimoi
 - @JeeT-149
 - @gaurii3009
-- @kaniuwu
+- @kanik10
 ## Run Locally
 
 Clone the project

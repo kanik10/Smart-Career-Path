@@ -3,10 +3,11 @@ import Resource from '../models/resourceModel.js';
 import asyncHandler from 'express-async-handler';
 
 export const getResources = asyncHandler(async (req, res) => {
-  const { careerPath, type } = req.query;
+  const { careerPath, type, domain } = req.query;
   const filter = {};
   if (careerPath) filter.careerPath = careerPath;
   if (type) filter.type = type;
+  if (domain && domain.trim()) filter.domain = domain;
   const resources = await Resource.find(filter).sort({ createdAt: -1 });
   res.json(resources);
 });

@@ -3,6 +3,7 @@ import {
   registerUser,
   loginUser,
   updateUserCareerPath,
+  updateSubDomain,
   getUserProfile,
   updateUserProfile,
   createAdminUser,
@@ -22,6 +23,7 @@ router.post('/admin', createAdminUser);
 
 // Protected student routes
 router.put('/career-path', protect, updateUserCareerPath); // Note: This should be a protected route
+router.put('/subdomain', protect, updateSubDomain);
 router.route('/profile')
   .get(protect, getUserProfile)
   .put(protect, updateUserProfile);

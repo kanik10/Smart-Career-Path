@@ -46,7 +46,7 @@ export const getDashboardData = asyncHandler(async (req, res) => {
     userProfile: {
       name: user.name,
       department: user.department,
-      profilePicture: user.profilePicture,
+      profilePicture: user.profileImage,
     },
     stats: {
       coursesEnrolled: user.enrolledCourses.length,

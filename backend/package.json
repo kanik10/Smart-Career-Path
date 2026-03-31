@@ -18,10 +18,12 @@
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "express-async-handler": "^1.2.0",
+    "groq-sdk": "^1.1.2",
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.20.0",
     "mongoose": "^8.18.3",
-    "multer": "^2.0.2"
+    "multer": "^2.0.2",
+    "pdf-parse": "^2.4.5"
   },
   "devDependencies": {
     "nodemon": "^3.1.10"

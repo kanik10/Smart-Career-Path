@@ -14,7 +14,7 @@ import dashboardRoutes from './routes/dashboardRoutes.js';
 import progressRoutes from './routes/progressRoutes.js';
 import userManagementRoutes from './routes/userManagementRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
-import groqRoutes from './routes/groqRoutes.js';
+import atsRoutes from './routes/atsRoutes.js';
 
 // dotenv.config(); // REMOVED - This is no longer needed
 
@@ -31,13 +31,12 @@ app.use('/api/users', userRoutes);
 app.use('/api/todos', todoRoutes);
 app.use('/api/announcements', announcementRoutes);
 app.use('/api/resources', resourceRoutes);
-app.use('/api/admin', userManagementRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/progress', progressRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/admin/users', userManagementRoutes);
-app.use('/api/groq', groqRoutes);
+app.use('/api/ats', atsRoutes);
 
 const __dirname = path.resolve();
 app.use('/uploads', express.static(path.join(__dirname, '/uploads')));

@@ -92,7 +92,7 @@ export default function UserManagement() {
   const filteredUsers = users.filter(user => {
     const matchesSearch = user.name.toLowerCase().includes(searchQuery.toLowerCase()) || user.email.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesDepartment = selectedDepartment === 'All Departments' || user.department === selectedDepartment;
-    const matchesSemester = selectedSemester === 'All Semesters' || user.semester === user.semester;
+    const matchesSemester = selectedSemester === 'All Semesters' || user.semester === selectedSemester;
     return matchesSearch && matchesDepartment && matchesSemester;
   });
 

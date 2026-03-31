@@ -5,6 +5,7 @@ const resourceSchema = new mongoose.Schema({
   title: { type: String, required: true },
   domain: { type: String, required: true },
   url: { type: String, required: true },
+  description: { type: String },
   instructor: { type: String }, // Renamed to 'educator' on the frontend
   thumbnailUrl: { type: String, default: '' },
   duration: { type: String },

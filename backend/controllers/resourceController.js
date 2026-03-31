@@ -3,20 +3,19 @@ import Resource from '../models/resourceModel.js';
 import asyncHandler from 'express-async-handler';
 
 export const getResources = asyncHandler(async (req, res) => {
-  const { careerPath, type, domain } = req.query;
+  const { careerPath, type } = req.query;
   const filter = {};
   if (careerPath) filter.careerPath = careerPath;
   if (type) filter.type = type;
-  if (domain && domain.trim()) filter.domain = domain;
   const resources = await Resource.find(filter).sort({ createdAt: -1 });
   res.json(resources);
 });
 
 export const createResource = asyncHandler(async (req, res) => {
   // Simplified fields
-  const { title, domain, url, instructor, thumbnailUrl, duration, type, careerPath } = req.body;
+  const { title, domain, url, description, instructor, thumbnailUrl, duration, type, careerPath } = req.body;
   const resource = await Resource.create({
-    title, domain, url, instructor, thumbnailUrl, duration, type, careerPath
+    title, domain, url, description, instructor, thumbnailUrl, duration, type, careerPath
   });
   res.status(201).json(resource);
 });

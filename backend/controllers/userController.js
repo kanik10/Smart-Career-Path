@@ -74,27 +74,6 @@ export const updateUserCareerPath = asyncHandler(async (req, res) => {
   }
 });
 
-export const updateSubDomain = async (req, res) => {
-  try {
-    const { subDomain, subDomainReason } = req.body;
-    const user = await User.findById(req.user._id);
-
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-
-    user.subDomain = subDomain;
-    user.subDomainReason = subDomainReason;
-    user.subDomainSetAt = Date.now();
-
-    await user.save();
-
-    return res.json({ success: true, subDomain, subDomainReason });
-  } catch (error) {
-    return res.status(500).json({ message: error.message });
-  }
-};
-
 
 // @desc    Get user profile
 export const getUserProfile = asyncHandler(async (req, res) => {
@@ -108,9 +87,6 @@ export const getUserProfile = asyncHandler(async (req, res) => {
       semester: user.semester,
       dateOfBirth: user.dateOfBirth,
       careerPath: user.careerPath,
-      subDomain: user.subDomain,
-      subDomainReason: user.subDomainReason,
-      subDomainSetAt: user.subDomainSetAt,
       profileImage: user.profileImage,
       skills: user.skills,
       workExperience: user.workExperience,

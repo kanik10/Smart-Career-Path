@@ -12,7 +12,7 @@ A career guidance platform for VPPCOE students.
 - express-async-handler: ^1.2.0 (Async error handling)
 - jsonwebtoken: ^9.0.2 (JWT authentication)
 - bcryptjs: ^3.0.2 (Password hashing)
-- mongodb: Latest (MongoDB driver)
+- mongodb: Th Latest (MongoDB driver)
 
 ### Frontend Dependencies
 - react: ^19.1.1

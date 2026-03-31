@@ -13,9 +13,6 @@ const userSchema = mongoose.Schema({
   status: { type: String, default: 'active', enum: ['active', 'inactive'] },
   
   careerPath: { type: String, default: null },
-  subDomain: { type: String, default: null },
-  subDomainReason: { type: String, default: null },
-  subDomainSetAt: { type: Date, default: null },
   profileImage: { type: String, default: '' },
   skills: { type: [String], default: [] },
   workExperience: { type: [String], default: [] },

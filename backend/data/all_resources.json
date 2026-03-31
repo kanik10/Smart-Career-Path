@@ -121,7 +121,7 @@
   },
   {
     "title": "Aptitude for GATE & GRE",
-    "domain": "GATE",
+    "domain": "Exams",
     "url": "https://www.udemy.com/course/quant_aptitud_tricks_and_shortcuts/",
     "instructor": "Dr. Kiran Derle",
     "thumbnailUrl": "https://img-c.udemycdn.com/course/240x135/2688198_bdcd_8.jpg",
@@ -131,7 +131,7 @@
   },
   {
     "title": "GRE Complete Prep: How to Score 330+",
-    "domain": "GRE",
+    "domain": "Exams",
     "url": "https://www.udemy.com/course/subeezy-gre/",
     "instructor": "Dr. Day",
     "thumbnailUrl": "https://img-c.udemycdn.com/course/240x135/3760728_7ac6_3.jpg",
@@ -141,7 +141,7 @@
   },
   {
     "title": "Quantitative Aptitude for CAT/MBA",
-    "domain": "MBA",
+    "domain": "Exams",
     "url": "https://www.udemy.com/course/quantitative-aptitude-made-easy/",
     "instructor": "Mandar Zarekar",
     "thumbnailUrl": "https://img-c.udemycdn.com/course/240x135/3658720_23fd_3.jpg",
@@ -211,7 +211,7 @@
   },
   {
     "title": "Intro to Entrepreneurship: Get started as an Entrepreneur",
-    "domain": "Startup Fundamentals",
+    "domain": "Introduction",
     "url": "https://www.udemy.com/course/intro-to-entrepreneurship-get-started-as-an-entrepreneur/",
     "instructor": "Evan Kimbrell",
     "thumbnailUrl": "https://img-c.udemycdn.com/course/240x135/662354_4ff7_7.jpg",
@@ -221,7 +221,7 @@
   },
   {
     "title": "The Complete Business Plan Course (Includes 50 Templates)",
-    "domain": "Startup Fundamentals",
+    "domain": "Introduction",
     "url": "https://www.udemy.com/course/the-complete-business-plan-course/",
     "instructor": "Chris Haroun",
     "thumbnailUrl": "https://img-c.udemycdn.com/course/240x135/1787702_b6d4_3.jpg",
@@ -231,7 +231,7 @@
   },
   {
     "title": "Entrepreneurship: How To Start A Business From An Idea",
-    "domain": "Startup Fundamentals",
+    "domain": "Introduction",
     "url": "https://www.udemy.com/course/how-to-start-a-business-go-from-business-idea-to-a-business/",
     "instructor": "Alex Genadinik",
     "thumbnailUrl": "https://img-c.udemycdn.com/course/240x135/176758_bdf3_22.jpg",
@@ -241,7 +241,7 @@
   },
   {
     "title": "Entrepreneurship: Launching an Innovative Business",
-    "domain": "Startup Fundamentals",
+    "domain": "Introduction",
     "url": "https://www.coursera.org/learn/wharton-entrepreneurship-launching-innovative-business",
     "instructor": "University of Pennsylvania",
     "thumbnailUrl": "https://d3njjcbhbojbot.cloudfront.net/api/utilities/v1/imageproxy/https://s3.amazonaws.com/coursera-course-photos/7b/1f4f7e8a9e11e5a6b8f4d7b2b4e0c1/Entrepreneurship_Coursera_Course_Thumb.png?auto=format%2C%20compress%2C%20enhance&dpr=1&w=265&h=216&q=50&fit=crop",
@@ -251,7 +251,7 @@
   },
   {
     "title": "Introduction to Business",
-    "domain": "Business & Finance",
+    "domain": "Business",
     "url": "https://www.coursera.org/specializations/business-introduction",
     "instructor": "University of California, Irvine",
     "thumbnailUrl": "https://d3njjcbhbojbot.cloudfront.net/api/utilities/v1/imageproxy/https://d15cw65ipctsrr.cloudfront.net/f0/505c854aa4444b9b1196ffe294f15c/intro-to-business_coursera-spec_600x600.jpg?auto=format%2C%20compress%2C%20enhance&dpr=1&w=265&h=216&q=50&fit=crop",
@@ -261,7 +261,7 @@
   },
   {
     "title": "Brand Management: Aligning Business, Brand and Behaviour",
-    "domain": "Marketing & Growth",
+    "domain": "Business",
     "url": "https://www.coursera.org/learn/brand",
     "instructor": "University of London",
     "thumbnailUrl": "https://d3njjcbhbojbot.cloudfront.net/api/utilities/v1/imageproxy/https://s3.amazonaws.com/coursera-course-photos/9a/eaaf20143211e5865e25d5c1659a56/MOOC-logo_wide.jpg?auto=format%2C%20compress%2C%20enhance&dpr=1&w=265&h=216&fit=crop&q=50",
@@ -271,7 +271,7 @@
   },
   {
     "title": "How to Start Your Own Business",
-    "domain": "Startup Fundamentals",
+    "domain": "Business",
     "url": "https://www.coursera.org/specializations/start-your-own-business",
     "instructor": "Michigan State University",
     "thumbnailUrl": "https://d3njjcbhbojbot.cloudfront.net/api/utilities/v1/imageproxy/https://d15cw65ipctsrr.cloudfront.net/d7/8fffd0be5e11e5a0757f0b45fcae50/business-photo-resized-3.jpg?auto=format%2C%20compress%2C%20enhance&dpr=1&w=265&h=216&fit=crop&q=50",
@@ -281,7 +281,7 @@
   },
   {
     "title": "Introduction to Marketing",
-    "domain": "Marketing & Growth",
+    "domain": "Marketing",
     "url": "https://www.coursera.org/learn/wharton-marketing",
     "instructor": "University of Pennsylvania",
     "thumbnailUrl": "https://d3njjcbhbojbot.cloudfront.net/api/utilities/v1/imageproxy/https://s3.amazonaws.com/coursera-course-photos/e1/c6bf80e99011e6a3f04f721ab5825e/Marketing_Coursera_Course_Thumb.png?auto=format%2C%20compress%2C%20enhance&dpr=1&w=265&h=216&q=50&fit=crop",
@@ -291,7 +291,7 @@
   },
   {
     "title": "Google Digital Marketing & E-commerce",
-    "domain": "Marketing & Growth",
+    "domain": "Marketing",
     "url": "https://www.coursera.org/professional-certificates/google-digital-marketing-ecommerce",
     "instructor": "Google",
     "thumbnailUrl": "https://d3njjcbhbojbot.cloudfront.net/api/utilities/v1/imageproxy/https://d15cw65ipctsrr.cloudfront.net/01/30ec6494c24c2ebaa4372771421136/Trin.jpg?auto=format%2C%20compress%2C%20enhance&dpr=1&w=320&h=180&fit=crop&q=50&crop=faces",
@@ -301,7 +301,7 @@
   },
   {
     "title": "Marketing Strategy",
-    "domain": "Marketing & Growth",
+    "domain": "Marketing",
     "url": "https://www.coursera.org/learn/illinois-tech-marketing-strategy",
     "instructor": "Illinois Tech",
     "thumbnailUrl": "https://d3njjcbhbojbot.cloudfront.net/api/utilities/v1/imageproxy/https://s3.amazonaws.com/coursera-course-photos/24/6b6335b5cf40818ec881cab47b35f3/mba-3.jpg?auto=format%2C%20compress%2C%20enhance&dpr=1&w=265&h=216&fit=crop&q=50",

@@ -4,8 +4,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Clock, User, Download, FileText } from 'lucide-react';
-import CareerChatbot from '../components/CareerChatbot';
-import '../components/CareerChatbot.css';
 import './Resources.css';
 
 // Sub-component for interactive Course cards
@@ -65,23 +63,12 @@ function MaterialCard({ material }) {
   );
 }
 
-const DOMAIN_OPTIONS = {
-  placements: ['DSA', 'Aptitude', 'Fullstack', 'ML', 'Frontend', 'Backend', 'DevOps', 'Cybersecurity', 'UX Design', 'Product Management'],
-  'higher-studies': ['IELTS', 'GRE', 'GATE', 'MBA', 'MS Computer Science', 'MS Data Science', 'MS Cybersecurity', 'Research & PhD'],
-  entrepreneurship: ['Startup Fundamentals', 'Business & Finance', 'Marketing & Growth', 'Product & Design', 'Legal & Operations', 'Fundraising & Pitching'],
-};
-
 
 export default function Resources() {
   const [activeTab, setActiveTab] = useState('courses');
   const [resources, setResources] = useState([]);
   const [userData, setUserData] = useState({ enrolledCourses: [], completedCourses: [] });
   const [domainFilter, setDomainFilter] = useState('all');
-  const [careerPath, setCareerPath] = useState(null);
-  const [subDomain, setSubDomain] = useState(null);
-  const [subDomainReason, setSubDomainReason] = useState(null);
-  const [isChangingDomain, setIsChangingDomain] = useState(false);
-  const [isRetakingChat, setIsRetakingChat] = useState(false);
   const navigate = useNavigate();
 
   const fetchAllData = async () => {
@@ -94,15 +81,11 @@ export default function Resources() {
       const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
       
       const profileRes = await axios.get('http://localhost:5000/api/users/profile', config);
-      const profileData = profileRes.data;
-      const { careerPath, enrolledCourses, completedCourses } = profileData;
-      setCareerPath(careerPath || null);
+      const { careerPath, enrolledCourses, completedCourses } = profileRes.data;
       setUserData({ enrolledCourses, completedCourses });
-      setSubDomain(profileData.subDomain || null);
-      setSubDomainReason(profileData.subDomainReason || null);
 
       if (careerPath) {
-        const resourcesRes = await axios.get(`http://localhost:5000/api/resources?careerPath=${careerPath}${(profileData.subDomain || null) ? `&domain=${encodeURIComponent(profileData.subDomain)}` : ''}`, config);
+        const resourcesRes = await axios.get(`http://localhost:5000/api/resources?careerPath=${careerPath}`, config);
         setResources(resourcesRes.data);
       }
     } catch (error) { console.error("Failed to fetch resources", error); }
@@ -144,43 +127,6 @@ export default function Resources() {
       } catch (error) { console.error("Failed to drop course", error); }
     }
   };
-
-  async function handleDomainChange(newDomain) {
-    try {
-      const token = JSON.parse(localStorage.getItem('userInfo')).token;
-      await fetch('/api/users/subdomain', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ subDomain: newDomain, subDomainReason: null }),
-      });
-      setSubDomain(newDomain);
-      setIsChangingDomain(false);
-      fetchAllData();
-    } catch (err) {
-      console.error('Failed to update domain', err);
-    }
-  }
-
-  async function handleClearDomain() {
-    try {
-      const token = JSON.parse(localStorage.getItem('userInfo')).token;
-      await fetch('/api/users/subdomain', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ subDomain: null, subDomainReason: null }),
-      });
-      setSubDomain(null);
-      setIsChangingDomain(false);
-    } catch (err) {
-      console.error('Failed to clear domain', err);
-    }
-  }
   
   const filteredResources = resources.filter(resource => {
     return domainFilter === 'all' || resource.domain === domainFilter;
@@ -219,91 +165,6 @@ export default function Resources() {
           </div>
         </div>
       </div>
-
-      {careerPath && (!subDomain || isRetakingChat) ? (
-        <div style={{ marginBottom: '2rem' }}>
-          <div className="resources-header">
-            <h1>Find Your Domain</h1>
-            <p>Answer a few quick questions and we'll personalise your resources.</p>
-          </div>
-          <CareerChatbot
-            careerPath={careerPath}
-            onComplete={(domain, reason) => {
-              setSubDomain(domain);
-              setSubDomainReason(reason);
-              setIsRetakingChat(false);
-              fetchAllData();
-            }}
-          />
-          {isRetakingChat && (
-            <div style={{ textAlign: 'center', marginTop: '0.75rem' }}>
-              <button
-                className="domain-cancel-btn"
-                onClick={() => setIsRetakingChat(false)}
-              >
-                Cancel — keep current domain ({subDomain})
-              </button>
-            </div>
-          )}
-        </div>
-      ) : null}
-
-      {careerPath && subDomain && (
-        <div className="domain-path-banner">
-          {!isChangingDomain ? (
-            <>
-              <div className="domain-path-info">
-                <span className="domain-path-label">Your path</span>
-                <span className="domain-path-value">
-                  {careerPath}
-                  <span className="domain-path-arrow"> {' → '} </span>
-                  <strong>{subDomain}</strong>
-                </span>
-              </div>
-              <div className="domain-action-buttons">
-                <button
-                  className="domain-change-btn"
-                  onClick={() => setIsChangingDomain(true)}
-                >
-                  Change domain
-                </button>
-                <button
-                  className="domain-retake-btn"
-                  onClick={() => {
-                    setIsRetakingChat(true);
-                    setIsChangingDomain(false);
-                  }}
-                >
-                  Retake chat
-                </button>
-              </div>
-            </>
-          ) : (
-            <>
-              <div className="domain-path-info">
-                <span className="domain-path-label">Select a new domain</span>
-              </div>
-              <div className="domain-change-dropdown-row">
-                {(DOMAIN_OPTIONS[careerPath] || []).map(domain => (
-                  <button
-                    key={domain}
-                    className={`domain-pill-btn ${domain === subDomain ? 'domain-pill-btn--active' : ''}`}
-                    onClick={() => handleDomainChange(domain)}
-                  >
-                    {domain}
-                  </button>
-                ))}
-                <button
-                  className="domain-cancel-btn"
-                  onClick={() => setIsChangingDomain(false)}
-                >
-                  Cancel
-                </button>
-              </div>
-            </>
-          )}
-        </div>
-      )}
 
       {activeTab === 'courses' && (
         <div className="resource-grid">

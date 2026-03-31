@@ -1,6 +1,7 @@
 import path from 'path';
 import express from 'express';
 import multer from 'multer';
+import { protect, admin } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
@@ -18,7 +19,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // Define the upload route
-router.post('/', upload.single('file'), (req, res) => {
+router.post('/', protect, admin, upload.single('file'), (req, res) => {
   // When a file is uploaded, multer adds a 'file' object to the request.
   // We send back the path where the file was saved.
   res.send({

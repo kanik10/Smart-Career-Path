@@ -16,6 +16,7 @@ import userManagementRoutes from './routes/userManagementRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import atsRoutes from './routes/atsRoutes.js';
 import groqRoutes from './routes/groqRoutes.js';
+import gamificationRoutes from './routes/gamificationRoutes.js';
 
 // dotenv.config(); // REMOVED - This is no longer needed
 
@@ -39,6 +40,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/admin/users', userManagementRoutes);
 app.use('/api/ats', atsRoutes);
 app.use('/api/groq', groqRoutes);
+app.use('/api/gamification', gamificationRoutes);
 
 const __dirname = path.resolve();
 app.use('/uploads', express.static(path.join(__dirname, '/uploads')));

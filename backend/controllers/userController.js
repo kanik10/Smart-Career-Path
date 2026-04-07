@@ -26,6 +26,8 @@ export const registerUser = asyncHandler(async (req, res) => {
       name: user.name,
       email: user.email,
       isAdmin: user.isAdmin,
+      profileImage: user.profileImage || '',
+      careerPath: user.careerPath || null,
       token: generateToken(user._id),
     });
   } else {
@@ -50,6 +52,8 @@ export const loginUser = asyncHandler(async (req, res) => {
       name: user.name,
       email: user.email,
       isAdmin: user.isAdmin,
+      profileImage: user.profileImage || '',
+      careerPath: user.careerPath || null,
       token: generateToken(user._id),
     });
   } else {
@@ -113,6 +117,7 @@ export const updateUserProfile = asyncHandler(async (req, res) => {
     user.linkedinUrl = req.body.linkedinUrl ?? user.linkedinUrl;
     user.githubUrl = req.body.githubUrl ?? user.githubUrl;
     user.portfolioUrl = req.body.portfolioUrl ?? user.portfolioUrl;
+    user.profileImage = req.body.profileImage ?? user.profileImage;
     const updatedUser = await user.save();
     res.json(updatedUser);
   } else {

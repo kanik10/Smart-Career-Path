@@ -11,7 +11,14 @@ export default function Dashboard() {
   const [todos, setTodos] = useState([]);
   const [newTodo, setNewTodo] = useState("");
   const [loading, setLoading] = useState(true);
+  const [avatarFailed, setAvatarFailed] = useState(false);
   const navigate = useNavigate();
+
+  const resolveImageUrl = (path) => {
+    if (!path || typeof path !== 'string') return '';
+    if (path.startsWith('http://') || path.startsWith('https://')) return path;
+    return `http://localhost:5000${path.startsWith('/') ? path : `/${path}`}`;
+  };
 
   const fetchData = async () => {
     const userInfo = JSON.parse(localStorage.getItem('userInfo'));
@@ -82,6 +89,8 @@ export default function Dashboard() {
   // Destructure the data from our single API call
   const { userProfile, stats, currentFocus, recentAchievements } = dashboardData;
 
+  const avatarUrl = resolveImageUrl(userProfile.profilePicture);
+
   return (
     <div className="dashboard-container">
       <div className="welcome-banner">
@@ -92,7 +101,11 @@ export default function Dashboard() {
       <div className="stats-grid">
         <div className="profile-card">
           <div className="avatar">
-            {userProfile.profilePicture ? <img src={userProfile.profilePicture} alt="Profile" /> : <User size={32} />}
+            {avatarUrl && !avatarFailed ? (
+              <img src={avatarUrl} alt="Profile" onError={() => setAvatarFailed(true)} />
+            ) : (
+              <User size={32} />
+            )}
           </div>
           <h3>{userProfile.name}</h3>
           <p>{userProfile.department}</p>

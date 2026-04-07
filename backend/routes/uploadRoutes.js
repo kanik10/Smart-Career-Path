@@ -18,6 +18,13 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
+router.post('/profile', protect, upload.single('file'), (req, res) => {
+  res.send({
+    message: 'Profile image uploaded successfully',
+    path: `/${req.file.path.replace(/\\/g, '/')}`,
+  });
+});
+
 // Define the upload route
 router.post('/', protect, admin, upload.single('file'), (req, res) => {
   // When a file is uploaded, multer adds a 'file' object to the request.

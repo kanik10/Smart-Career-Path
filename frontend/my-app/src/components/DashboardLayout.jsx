@@ -3,7 +3,7 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import vppcoeLogo from '../assets/vppcoe-logo.png';
 // Import the necessary icons
-import { LayoutDashboard, User, Megaphone, BookCopy, BarChart2, LogOut } from 'lucide-react';
+import { LayoutDashboard, User, Megaphone, BookCopy, BarChart2, LogOut, Trophy } from 'lucide-react';
 
 // Add an 'icon' property to each navigation item
 const navItems = [
@@ -12,6 +12,7 @@ const navItems = [
   { path: '/announcements', label: 'Announcements', icon: Megaphone },
   { path: '/resources', label: 'Resources', icon: BookCopy },
   { path: '/progress', label: 'Progress', icon: BarChart2 },
+  { path: '/gamification', label: 'Game Arena', icon: Trophy },
 ];
 
 export default function DashboardLayout() {

@@ -25,6 +25,14 @@ import AdminAnnouncements from './pages/AdminAnnouncements';
 import AdminResourceCategoryPage from './pages/AdminResourceCategoryPage'; 
 import UserManagement from './pages/UserManagement';
 
+// Gamification Pages
+import GamificationHub from './pages/gamification/GamificationHub';
+import GamificationArena from './pages/gamification/GamificationArena';
+import SprintGame from './pages/gamification/SprintGame';
+import SpinGame from './pages/gamification/SpinGame';
+import FlashcardsGame from './pages/gamification/FlashcardsGame';
+import BossBattleGame from './pages/gamification/BossBattleGame';
+
 
 function App() {
   return (
@@ -43,6 +51,14 @@ function App() {
           <Route path="/announcements" element={<Announcements />} />
           <Route path="/resources" element={<Resources />} />
           <Route path="/progress" element={<Progress />} />
+          
+          {/* Gamification Routes */}
+          <Route path="/gamification" element={<GamificationHub />} />
+          <Route path="/gamification/arena" element={<GamificationArena />} />
+          <Route path="/gamification/sprint" element={<SprintGame />} />
+          <Route path="/gamification/spin" element={<SpinGame />} />
+          <Route path="/gamification/flashcards" element={<FlashcardsGame />} />
+          <Route path="/gamification/boss-battle" element={<BossBattleGame />} />
         </Route>
 
         {/* --- Admin Routes (Inside Admin Layout) --- */}

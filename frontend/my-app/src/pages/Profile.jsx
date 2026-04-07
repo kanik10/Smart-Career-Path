@@ -1,6 +1,6 @@
 // src/pages/Profile.jsx
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Edit, Save, X, Upload, ExternalLink, Linkedin, Github } from 'lucide-react';
@@ -13,7 +13,16 @@ export default function Profile() {
   const [newCertification, setNewCertification] = useState('');
   const [newExperience, setNewExperience] = useState(''); // 1. ADDED: State for new work experience
   const [loading, setLoading] = useState(true);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const fileInputRef = useRef(null);
   const navigate = useNavigate();
+
+  const getInitials = (name) => (name || '')
+    .split(' ')
+    .map((n) => n[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -44,9 +53,64 @@ export default function Profile() {
     try {
       const { data } = await axios.put('http://localhost:5000/api/users/profile', editData, config);
       setUser(data);
+      const stored = JSON.parse(localStorage.getItem('userInfo') || '{}');
+      localStorage.setItem('userInfo', JSON.stringify({
+        ...stored,
+        name: data.name,
+        careerPath: data.careerPath,
+        profileImage: data.profileImage || '',
+      }));
       setIsEditing(false);
     } catch (error) {
       console.error('Failed to save profile', error);
+    }
+  };
+
+  const handlePhotoUpload = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+    if (!userInfo?.token) {
+      navigate('/login');
+      return;
+    }
+
+    try {
+      setUploadingPhoto(true);
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const uploadConfig = {
+        headers: {
+          Authorization: `Bearer ${userInfo.token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      };
+
+      const uploadRes = await axios.post('http://localhost:5000/api/upload/profile', formData, uploadConfig);
+      const imagePath = uploadRes.data?.path || '';
+      if (!imagePath) return;
+
+      const nextData = { ...editData, profileImage: imagePath };
+      setEditData(nextData);
+
+      const profileConfig = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+      const { data } = await axios.put('http://localhost:5000/api/users/profile', nextData, profileConfig);
+      setUser(data);
+
+      const stored = JSON.parse(localStorage.getItem('userInfo') || '{}');
+      localStorage.setItem('userInfo', JSON.stringify({
+        ...stored,
+        name: data.name,
+        careerPath: data.careerPath,
+        profileImage: data.profileImage || '',
+      }));
+    } catch (error) {
+      console.error('Failed to upload profile photo', error);
+    } finally {
+      setUploadingPhoto(false);
+      if (event.target) event.target.value = '';
     }
   };
 
@@ -110,8 +174,33 @@ export default function Profile() {
         <h2>Basic Details</h2>
         <div className="details-content">
           <div className="avatar-section">
-            <div className="avatar-large">{user.name.split(' ').map(n => n[0]).join('')}</div>
-            {isEditing && <button className="btn-upload"><Upload size={16}/> Upload Photo</button>}
+            <div className="avatar-large">
+              {currentData.profileImage ? (
+                <img src={`http://localhost:5000${currentData.profileImage}`} alt="Profile" className="avatar-image" />
+              ) : (
+                getInitials(user.name)
+              )}
+            </div>
+            {isEditing && (
+              <>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden-file-input"
+                  onChange={handlePhotoUpload}
+                />
+                <button
+                  className="btn-upload"
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploadingPhoto}
+                >
+                  <Upload size={16}/>
+                  {uploadingPhoto ? 'Uploading...' : 'Upload Photo'}
+                </button>
+              </>
+            )}
           </div>
           <div className="details-grid">
             <div className="detail-item"><label>Name</label><p>{user.name}</p></div>

@@ -177,6 +177,7 @@ const WHEEL_TOPICS = [
 ];
 
 const WHEEL_COLORS = ['#1f7ec8', '#215f9f', '#f0bf2f', '#5db53d', '#10b070', '#7a3bc9', '#be1f25', '#de7a10'];
+const POINTER_ANGLE_DEGREES = 0; // Pointer is positioned at the right side of the wheel.
 
 const toOptionText = (option) => {
   if (typeof option === 'string') return option.trim();
@@ -346,6 +347,17 @@ export default function SpinGame() {
 
   const segmentAngle = 360 / WHEEL_TOPICS.length;
 
+  const getTopicFromWheelRotation = useCallback(
+    (absoluteRotation) => {
+      const normalizedRotation = ((absoluteRotation % 360) + 360) % 360;
+      const pointerRelativeAngle = (POINTER_ANGLE_DEGREES - normalizedRotation + 360) % 360;
+      const normalizedWithOffset = (pointerRelativeAngle + 90) % 360;
+      const index = Math.floor((normalizedWithOffset + 0.0001) / segmentAngle) % WHEEL_TOPICS.length;
+      return WHEEL_TOPICS[index];
+    },
+    [segmentAngle]
+  );
+
   const loadQuestionsForTopic = async (topic) => {
     try {
       setError(null);
@@ -386,15 +398,15 @@ export default function SpinGame() {
     if (WHEEL_TOPICS.length > 1 && WHEEL_TOPICS[randomIndex] === lastTopicRef.current) {
       randomIndex = (randomIndex + 1 + Math.floor(Math.random() * (WHEEL_TOPICS.length - 1))) % WHEEL_TOPICS.length;
     }
-    const landingTopic = WHEEL_TOPICS[randomIndex];
-    lastTopicRef.current = landingTopic;
-
     const fullSpins = 5;
     const finalLandingAngle = randomIndex * segmentAngle + segmentAngle / 2;
-    const desiredStopAngle = 360 - finalLandingAngle;
+    const desiredStopAngle = ((90 - finalLandingAngle) % 360 + 360) % 360;
     const normalizedCurrent = ((rotation % 360) + 360) % 360;
     const delta = (desiredStopAngle - normalizedCurrent + 360) % 360;
     const targetRotation = rotation + fullSpins * 360 + delta;
+    const landingTopic = getTopicFromWheelRotation(targetRotation);
+
+    lastTopicRef.current = landingTopic;
 
     setRotation(targetRotation);
 

@@ -4,7 +4,8 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "nodemon --env-file=.env server.js",
+    "dev": "nodemon --env-file=.env server.js",
+    "start": "node server.js",
     "data:import": "node --env-file=.env seeder.js data/all_resources.json",
     "data:destroy": "node --env-file=.env seeder.js -d",
     "fix:gamification-data": "node --env-file=.env scripts/fixGamificationData.js"

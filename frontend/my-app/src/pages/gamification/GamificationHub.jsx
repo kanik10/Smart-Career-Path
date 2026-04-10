@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, Crown, Flame, Trophy } from 'lucide-react';
 import { gamificationService } from '../../services/gamificationService';
 import { THEME, XP_PER_LEVEL } from './gamificationConfig';
+import { toBackendUrl } from '../../utils/backendUrl';
 import './gamificationHub.css';
 
 function getInitials(name) {
@@ -117,7 +118,7 @@ export default function GamificationHub() {
                 <div className="gh-avatar-ring">
                   <div className="gh-avatar">
                     {profileImage ? (
-                      <img src={`http://localhost:5000${profileImage}`} alt={name} className="gh-avatar-image" />
+                      <img src={toBackendUrl(profileImage)} alt={name} className="gh-avatar-image" />
                     ) : (
                       getInitials(name)
                     )}
@@ -242,7 +243,7 @@ export default function GamificationHub() {
                       {entry ? (
                         entry.profileImage ? (
                           <img
-                            src={`http://localhost:5000${entry.profileImage}`}
+                            src={toBackendUrl(entry.profileImage)}
                             alt={entry.name}
                             className="gh-podium-avatar-image"
                           />

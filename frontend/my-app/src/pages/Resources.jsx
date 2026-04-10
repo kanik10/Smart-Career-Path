@@ -7,6 +7,7 @@ import { Clock, User, Download, FileText } from 'lucide-react';
 import CareerChatbot from '../components/CareerChatbot';
 import '../components/CareerChatbot.css';
 import './Resources.css';
+import { toBackendUrl } from '../utils/backendUrl';
 
 // Sub-component for interactive Course cards
 function CourseCard({ course, userData, onEnroll, onComplete, onDrop }) {
@@ -44,7 +45,7 @@ function CourseCard({ course, userData, onEnroll, onComplete, onDrop }) {
 
 // Sub-component for simple Material cards
 function MaterialCard({ material }) {
-  const fullDownloadUrl = `http://localhost:5000${material.url}`;
+  const fullDownloadUrl = toBackendUrl(material.url);
 
   return (
     <div className="material-card">
@@ -148,7 +149,7 @@ export default function Resources() {
   async function handleDomainChange(newDomain) {
     try {
       const token = JSON.parse(localStorage.getItem('userInfo')).token;
-      await fetch('/api/users/subdomain', {
+      await fetch(toBackendUrl('/api/users/subdomain'), {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -167,7 +168,7 @@ export default function Resources() {
   async function handleClearDomain() {
     try {
       const token = JSON.parse(localStorage.getItem('userInfo')).token;
-      await fetch('/api/users/subdomain', {
+      await fetch(toBackendUrl('/api/users/subdomain'), {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

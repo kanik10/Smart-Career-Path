@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Edit, Save, X, Upload, ExternalLink, Linkedin, Github } from 'lucide-react';
+import { toBackendUrl } from '../utils/backendUrl';
 
 export default function Profile() {
   const [user, setUser] = useState(null);
@@ -176,7 +177,7 @@ export default function Profile() {
           <div className="avatar-section">
             <div className="avatar-large">
               {currentData.profileImage ? (
-                <img src={`http://localhost:5000${currentData.profileImage}`} alt="Profile" className="avatar-image" />
+                <img src={toBackendUrl(currentData.profileImage)} alt="Profile" className="avatar-image" />
               ) : (
                 getInitials(user.name)
               )}

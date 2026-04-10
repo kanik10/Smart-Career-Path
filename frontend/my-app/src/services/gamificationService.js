@@ -1,6 +1,7 @@
 import axios from 'axios';
+import { toBackendUrl } from '../utils/backendUrl';
 
-const API_BASE = 'http://localhost:5000/api/gamification';
+const API_BASE = toBackendUrl('/api/gamification');
 
 // Helper to get auth token from localStorage
 const getAuthToken = () => {

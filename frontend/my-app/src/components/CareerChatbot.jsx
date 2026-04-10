@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import axios from 'axios';
 import '../pages/Resources.css';
 import './CareerChatbot.css';
+import { toBackendUrl } from '../utils/backendUrl';
 
 const initialPrompts = {
   placements:
@@ -97,7 +98,7 @@ export default function CareerChatbot({ careerPath, onComplete }) {
       }));
 
       const { data } = await axios.post(
-        '/api/groq/chat',
+        toBackendUrl('/api/groq/chat'),
         {
           messages: payloadMessages,
           careerPath,
@@ -152,7 +153,7 @@ export default function CareerChatbot({ careerPath, onComplete }) {
     try {
       setIsLoading(true);
       await axios.put(
-        '/api/users/subdomain',
+        toBackendUrl('/api/users/subdomain'),
         {
           subDomain: recommendation.subDomain,
           subDomainReason: recommendation.reason,

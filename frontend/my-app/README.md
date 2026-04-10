@@ -2,6 +2,22 @@
 
 A career guidance platform for VPPCOE students.
 
+## Run Locally
+
+1. Start backend at port 5000.
+2. In this folder, install dependencies and run Vite:
+	- npm install
+	- npm run dev
+
+## Vercel Deployment Notes
+
+1. Deploy from repository root. The root vercel.json builds this frontend from frontend/my-app.
+2. Set frontend environment variable in Vercel:
+	- VITE_API_ORIGIN=https://your-backend-domain.com
+3. Redeploy after saving environment variables.
+
+You can copy frontend/my-app/.env.example for local environment setup.
+
 ## Dependencies
 
 ### Backend Dependencies

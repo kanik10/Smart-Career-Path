@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import axios from 'axios';
 import { Plus, Trash2, CheckCircle, Circle, User, BookOpen, Award, ListChecks, Lightbulb } from "lucide-react";
 import './Dashboard.css';
+import { toBackendUrl } from '../utils/backendUrl';
 
 export default function Dashboard() {
   const [dashboardData, setDashboardData] = useState(null);
@@ -16,8 +17,7 @@ export default function Dashboard() {
 
   const resolveImageUrl = (path) => {
     if (!path || typeof path !== 'string') return '';
-    if (path.startsWith('http://') || path.startsWith('https://')) return path;
-    return `http://localhost:5000${path.startsWith('/') ? path : `/${path}`}`;
+    return toBackendUrl(path);
   };
 
   const fetchData = async () => {

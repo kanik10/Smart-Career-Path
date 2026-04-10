@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { gamificationService } from '../../services/gamificationService';
 import { getStageTopics } from './gamificationConfig';
+import { toBackendUrl } from '../../utils/backendUrl';
 import './gamificationArena.css';
 
 const WEEKLY_STAGE_TOPICS = {
@@ -183,7 +184,7 @@ export default function GamificationArena() {
               <div className="arena-user-wrap">
                 <div className="arena-avatar">
                   {profileImage ? (
-                    <img src={`http://localhost:5000${profileImage}`} alt={name} className="arena-avatar-image" />
+                    <img src={toBackendUrl(profileImage)} alt={name} className="arena-avatar-image" />
                   ) : (
                     getInitials(name)
                   )}

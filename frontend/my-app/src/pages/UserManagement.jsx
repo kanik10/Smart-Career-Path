@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search } from 'lucide-react';
+import { Eye, EyeOff, Search, X } from 'lucide-react';
 import axios from 'axios';
 import './UserManagement.css';
 
@@ -24,12 +24,22 @@ export default function UserManagement() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDepartment, setSelectedDepartment] = useState('All Departments');
   const [selectedSemester, setSelectedSemester] = useState('All Semesters');
+  const [passwordModal, setPasswordModal] = useState({
+    open: false,
+    userId: '',
+    userName: '',
+    oldPassword: '',
+    newPassword: '',
+    showOldPassword: false,
+    showNewPassword: false,
+    loading: false,
+  });
 
   const fetchUsers = async () => {
     try {
       const userInfo = JSON.parse(localStorage.getItem('userInfo'));
       if (!userInfo || !userInfo.token || !userInfo.isAdmin) {
-        navigate('/login');
+        navigate('/admin');
         return;
       }
 
@@ -63,14 +73,52 @@ export default function UserManagement() {
     }
   };
 
-  const handleResetPassword = async (userId) => {
+  const openPasswordModal = (userId, userName) => {
+    setPasswordModal({
+      open: true,
+      userId,
+      userName,
+      oldPassword: '',
+      newPassword: '',
+      showOldPassword: false,
+      showNewPassword: false,
+      loading: false,
+    });
+  };
+
+  const closePasswordModal = () => {
+    setPasswordModal((prev) => ({ ...prev, open: false }));
+  };
+
+  const handleResetPassword = async () => {
+    if (!passwordModal.oldPassword || !passwordModal.newPassword) {
+      alert('Please enter both old and new password');
+      return;
+    }
+
+    if (passwordModal.newPassword.length < 6) {
+      alert('New password must be at least 6 characters long');
+      return;
+    }
+
     try {
+      setPasswordModal((prev) => ({ ...prev, loading: true }));
       const userInfo = JSON.parse(localStorage.getItem('userInfo'));
       const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-      const { data } = await axios.post(`http://localhost:5000/api/admin/users/${userId}/reset-password`, {}, config);
-      alert(data.message); // Show the message with the temp password from the server
+      const { data } = await axios.post(
+        `http://localhost:5000/api/admin/users/${passwordModal.userId}/reset-password`,
+        {
+          oldPassword: passwordModal.oldPassword,
+          newPassword: passwordModal.newPassword,
+        },
+        config
+      );
+      alert(data.message);
+      closePasswordModal();
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to reset password');
+    } finally {
+      setPasswordModal((prev) => ({ ...prev, loading: false }));
     }
   };
 
@@ -153,7 +201,7 @@ export default function UserManagement() {
                   <button onClick={() => handleStatusChange(user._id, user.status)} className="action-btn">
                     {user.status === 'active' ? 'Deactivate' : 'Activate'}
                   </button>
-                  <button onClick={() => handleResetPassword(user._id)} className="action-btn reset">
+                  <button onClick={() => openPasswordModal(user._id, user.name)} className="action-btn reset">
                     Reset Password
                   </button>
                 </td>
@@ -162,6 +210,82 @@ export default function UserManagement() {
           </tbody>
         </table>
       </section>
+
+      {passwordModal.open && (
+        <div className="password-modal-overlay" onClick={closePasswordModal}>
+          <div className="password-modal" onClick={(event) => event.stopPropagation()}>
+            <div className="password-modal-header">
+              <h3>Update Password</h3>
+              <button className="icon-close-btn" onClick={closePasswordModal}>
+                <X size={18} />
+              </button>
+            </div>
+
+            <p className="password-modal-subtitle">Set a new password for {passwordModal.userName}.</p>
+
+            <div className="password-field-group">
+              <label htmlFor="old-password">Old Password</label>
+              <div className="password-input-wrap">
+                <input
+                  id="old-password"
+                  type={passwordModal.showOldPassword ? 'text' : 'password'}
+                  value={passwordModal.oldPassword}
+                  onChange={(event) =>
+                    setPasswordModal((prev) => ({ ...prev, oldPassword: event.target.value }))
+                  }
+                  placeholder="Enter old password"
+                />
+                <button
+                  type="button"
+                  className="password-eye-btn"
+                  onClick={() =>
+                    setPasswordModal((prev) => ({ ...prev, showOldPassword: !prev.showOldPassword }))
+                  }
+                >
+                  {passwordModal.showOldPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+            </div>
+
+            <div className="password-field-group">
+              <label htmlFor="new-password">New Password</label>
+              <div className="password-input-wrap">
+                <input
+                  id="new-password"
+                  type={passwordModal.showNewPassword ? 'text' : 'password'}
+                  value={passwordModal.newPassword}
+                  onChange={(event) =>
+                    setPasswordModal((prev) => ({ ...prev, newPassword: event.target.value }))
+                  }
+                  placeholder="Enter new password"
+                />
+                <button
+                  type="button"
+                  className="password-eye-btn"
+                  onClick={() =>
+                    setPasswordModal((prev) => ({ ...prev, showNewPassword: !prev.showNewPassword }))
+                  }
+                >
+                  {passwordModal.showNewPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+            </div>
+
+            <div className="password-modal-actions">
+              <button className="action-btn" onClick={closePasswordModal} disabled={passwordModal.loading}>
+                Cancel
+              </button>
+              <button
+                className="action-btn reset"
+                onClick={handleResetPassword}
+                disabled={passwordModal.loading}
+              >
+                {passwordModal.loading ? 'Updating...' : 'Update Password'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

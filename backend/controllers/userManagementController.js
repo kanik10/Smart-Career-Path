@@ -4,7 +4,57 @@ import asyncHandler from 'express-async-handler';
 import User from '../models/userModel.js';
 import bcrypt from 'bcryptjs';
 
+const buildStudentProgressPayload = (users = []) => {
+  const students = users
+    .map((user) => {
+      const enrolledCourses = (user.enrolledCourses || []).map((course) => course?.title).filter(Boolean);
+      const completedCourses = (user.completedCourses || []).map((course) => course?.title).filter(Boolean);
+
+      return {
+        _id: user._id,
+        name: user.name,
+        department: user.department,
+        semester: user.semester,
+        careerPath: user.careerPath || null,
+        enrolledCourses,
+        completedCourses,
+        enrolledCoursesCount: enrolledCourses.length,
+        completedCoursesCount: completedCourses.length,
+      };
+    })
+    .sort((a, b) => {
+      if (b.completedCoursesCount !== a.completedCoursesCount) {
+        return b.completedCoursesCount - a.completedCoursesCount;
+      }
+      return a.name.localeCompare(b.name);
+    });
+
+  const departments = Array.from(new Set(students.map((s) => s.department).filter(Boolean))).sort();
+  const semesters = Array.from(new Set(students.map((s) => s.semester).filter(Boolean))).sort();
+  const careerPaths = Array.from(new Set(students.map((s) => s.careerPath).filter(Boolean))).sort();
+
+  return {
+    students,
+    filters: {
+      departments,
+      semesters,
+      careerPaths,
+    },
+  };
+};
+
 export const getUsers = asyncHandler(async (req, res) => {
+  if (req.query.view === 'student-progress') {
+    const users = await User.find({ isAdmin: false })
+      .select('name department semester careerPath enrolledCourses completedCourses')
+      .populate('enrolledCourses', 'title')
+      .populate('completedCourses', 'title')
+      .lean();
+
+    res.json(buildStudentProgressPayload(users));
+    return;
+  }
+
   // Get all non-admin users
   const users = await User.find({ isAdmin: false }).select('-password').sort({ createdAt: -1 });
 
@@ -33,10 +83,27 @@ export const resetUserPassword = asyncHandler(async (req, res) => {
   const user = await User.findById(req.params.id);
   if (!user) { res.status(404); throw new Error('User not found'); }
 
-  const tempPassword = 'vppcoe@123';
-  user.password = tempPassword; // Pre-save hook will hash this
+  const { oldPassword, newPassword } = req.body;
+
+  if (!oldPassword || !newPassword) {
+    res.status(400);
+    throw new Error('Old password and new password are required');
+  }
+
+  if (newPassword.length < 6) {
+    res.status(400);
+    throw new Error('New password must be at least 6 characters long');
+  }
+
+  const isOldPasswordValid = await user.matchPassword(oldPassword);
+  if (!isOldPasswordValid) {
+    res.status(400);
+    throw new Error('Old password is incorrect');
+  }
+
+  user.password = newPassword; // Pre-save hook will hash this
   await user.save();
-  res.json({ message: `Password reset successfully. Temp password: ${tempPassword}` });
+  res.json({ message: 'Password updated successfully' });
 });
 
 // --- ADD THIS NEW FUNCTION ---
@@ -53,4 +120,14 @@ export const updateUserCareerPathByAdmin = asyncHandler(async (req, res) => {
   user.careerPath = careerPath;
   await user.save();
   res.json({ message: 'Career path updated successfully' });
+});
+
+export const getStudentProgressList = asyncHandler(async (req, res) => {
+  const users = await User.find({ isAdmin: false })
+    .select('name department semester careerPath enrolledCourses completedCourses')
+    .populate('enrolledCourses', 'title')
+    .populate('completedCourses', 'title')
+    .lean();
+
+  res.json(buildStudentProgressPayload(users));
 });

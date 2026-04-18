@@ -8,6 +8,7 @@ import AdminLayout from './components/AdminLayout';
 
 // Public Pages
 import Login from './pages/Login';
+import AdminLogin from './pages/AdminLogin';
 import Register from './pages/Register';
 import Quiz from './pages/Quiz';
 
@@ -24,6 +25,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import AdminAnnouncements from './pages/AdminAnnouncements';
 import AdminResourceCategoryPage from './pages/AdminResourceCategoryPage'; 
 import UserManagement from './pages/UserManagement';
+import AdminStudentProgress from './pages/AdminStudentProgress';
 
 // Gamification Pages
 import GamificationHub from './pages/gamification/GamificationHub';
@@ -40,6 +42,7 @@ function App() {
       <Routes>
         {/* --- Public Routes --- */}
         <Route path="/login" element={<Login />} />
+        <Route path="/admin" element={<AdminLogin />} />
         <Route path="/register" element={<Register />} />
         <Route path="/quiz" element={<Quiz />} />
         <Route path="/" element={<Navigate to="/login" />} />
@@ -62,12 +65,12 @@ function App() {
         </Route>
 
         {/* --- Admin Routes (Inside Admin Layout) --- */}
-        <Route path="/admin" element={<AdminLayout />}>
+        <Route path="/admin/*" element={<AdminLayout />}>
           <Route path="dashboard" element={<AdminDashboard />} />
+          <Route path="student-progress" element={<AdminStudentProgress />} />
           <Route path="announcements" element={<AdminAnnouncements />} />
           <Route path="resources/:careerPath" element={<AdminResourceCategoryPage />} />
           <Route path="user-management" element={<UserManagement />} />
-          <Route index element={<Navigate to="dashboard" />} />
         </Route>
       </Routes>
     </BrowserRouter>

@@ -826,36 +826,100 @@ export const getDomainTopics = asyncHandler(async (req, res) => {
   });
 });
 
-// @desc    Get user's weekly leaderboard rank
+// @desc    Get leaderboard rank (weekly or overall)
 export const getLeaderboard = asyncHandler(async (req, res) => {
   const userId = req.user._id;
-  const { limit = 10, domain } = req.query;
+  const { limit = 10, domain, period = 'weekly' } = req.query;
+  const isWeekly = period !== 'overall';
+  const numericLimit = Math.max(1, parseInt(limit, 10) || 10);
 
-  // Calculate week start date
+  if (!isWeekly) {
+    const profileRows = await GamificationProfile.find({})
+      .sort({ totalXp: -1, updatedAt: 1 })
+      .limit(numericLimit)
+      .lean();
+
+    const profileUserIds = profileRows.map((row) => row.userId);
+    const users = await User.find({ _id: { $in: profileUserIds } })
+      .select('name profileImage')
+      .lean();
+
+    const userMap = new Map(users.map((user) => [String(user._id), user]));
+
+    const leaders = profileRows.map((entry, index) => {
+      const user = userMap.get(String(entry.userId));
+      const totalXp = Number(entry.totalXp || 0);
+      return {
+        rank: index + 1,
+        userId: entry.userId,
+        name: user?.name || 'Unknown',
+        profileImage: user?.profileImage || '',
+        level: Math.floor(totalXp / XP_PER_LEVEL) + 1,
+        xp: totalXp,
+        isCurrentUser: String(entry.userId) === String(userId),
+      };
+    });
+
+    let currentUserRank = leaders.find((entry) => entry.isCurrentUser) || null;
+    if (!currentUserRank) {
+      const allProfiles = await GamificationProfile.find({})
+        .sort({ totalXp: -1, updatedAt: 1 })
+        .select('userId totalXp')
+        .lean();
+
+      const userRankIndex = allProfiles.findIndex((entry) => String(entry.userId) === String(userId));
+      if (userRankIndex !== -1) {
+        const currentUser = await User.findById(userId).select('name profileImage').lean();
+        const userTotalXp = Number(allProfiles[userRankIndex].totalXp || 0);
+        currentUserRank = {
+          rank: userRankIndex + 1,
+          userId,
+          name: currentUser?.name || 'You',
+          profileImage: currentUser?.profileImage || '',
+          level: Math.floor(userTotalXp / XP_PER_LEVEL) + 1,
+          xp: userTotalXp,
+          isCurrentUser: true,
+        };
+      }
+    }
+
+    res.json({
+      period: 'overall',
+      leaders,
+      currentUser: currentUserRank,
+    });
+    return;
+  }
+
+  // Calculate week start date for weekly mode
   const now = new Date();
   const weekStart = new Date(now);
   weekStart.setDate(now.getDate() - now.getDay());
   weekStart.setHours(0, 0, 0, 0);
 
-  // Aggregate XP from this week
+  const matchStage = {
+    ...(domain && { domain }),
+    ...(isWeekly && { createdAt: { $gte: weekStart } }),
+  };
+
+  const scoreField = isWeekly ? 'weeklyXp' : 'xp';
+
+  // Aggregate leaderboard scores
   const leaderboardAgg = await XPLog.aggregate([
     {
-      $match: {
-        createdAt: { $gte: weekStart },
-        ...(domain && { domain }),
-      },
+      $match: matchStage,
     },
     {
       $group: {
         _id: '$userId',
-        weeklyXp: { $sum: '$xpAmount' },
+        [scoreField]: { $sum: '$xpAmount' },
       },
     },
     {
-      $sort: { weeklyXp: -1 },
+      $sort: { [scoreField]: -1 },
     },
     {
-      $limit: parseInt(limit),
+      $limit: numericLimit,
     },
     {
       $lookup: {
@@ -877,7 +941,7 @@ export const getLeaderboard = asyncHandler(async (req, res) => {
         name: entry.userInfo[0]?.name || 'Unknown',
         profileImage: entry.userInfo[0]?.profileImage || '',
         level: Math.floor(totalXp / XP_PER_LEVEL) + 1,
-        weeklyXp: entry.weeklyXp,
+        [scoreField]: entry[scoreField],
         isCurrentUser: entry._id.toString() === userId.toString(),
       };
     })
@@ -888,19 +952,16 @@ export const getLeaderboard = asyncHandler(async (req, res) => {
   if (!currentUserRank) {
     const allLeaderboard = await XPLog.aggregate([
       {
-        $match: {
-          createdAt: { $gte: weekStart },
-          ...(domain && { domain }),
-        },
+        $match: matchStage,
       },
       {
         $group: {
           _id: '$userId',
-          weeklyXp: { $sum: '$xpAmount' },
+          [scoreField]: { $sum: '$xpAmount' },
         },
       },
       {
-        $sort: { weeklyXp: -1 },
+        $sort: { [scoreField]: -1 },
       },
     ]);
 
@@ -915,14 +976,14 @@ export const getLeaderboard = asyncHandler(async (req, res) => {
         name: user?.name || 'You',
         profileImage: user?.profileImage || '',
         level: Math.floor(totalXp / XP_PER_LEVEL) + 1,
-        weeklyXp: allLeaderboard[userRankIndex].weeklyXp,
+        [scoreField]: allLeaderboard[userRankIndex][scoreField],
         isCurrentUser: true,
       };
     }
   }
 
   res.json({
-    period: 'weekly',
+    period: isWeekly ? 'weekly' : 'overall',
     leaders,
     currentUser: currentUserRank || null,
   });

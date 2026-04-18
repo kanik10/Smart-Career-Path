@@ -1,7 +1,13 @@
 import Groq from 'groq-sdk';
 import { extractPdfText } from '../utils/extractPdfText.js';
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+const getGroqClient = () => {
+  const apiKey = process.env.GROQ_API_KEY;
+  if (!apiKey) {
+    throw new Error('GROQ_API_KEY is missing in backend/.env');
+  }
+  return new Groq({ apiKey });
+};
 
 const cleanJsonText = (text) => {
   return String(text || '')
@@ -39,6 +45,13 @@ const parseJsonSafely = (text) => {
 };
 
 export const checkATS = async (req, res) => {
+  let groq;
+  try {
+    groq = getGroqClient();
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+
   const resumeFile = req.files?.resume?.[0] || null;
   const jobDescriptionFile = req.files?.jobDescriptionFile?.[0] || null;
   const jobDescriptionTextInput = (req.body?.jobDescriptionText || '').trim();

@@ -49,7 +49,8 @@ export default function GamificationHub() {
   const { careerPath = 'placements', name = 'Student', profileImage = '' } = userInfo;
 
   const [profile, setProfile] = useState(null);
-  const [leaderboard, setLeaderboard] = useState([]);
+  const [weeklyLeaderboard, setWeeklyLeaderboard] = useState([]);
+  const [overallLeaderboard, setOverallLeaderboard] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -57,13 +58,15 @@ export default function GamificationHub() {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const [profileData, leaderboardData] = await Promise.all([
+        const [profileData, weeklyLeaderboardData, overallLeaderboardData] = await Promise.all([
           gamificationService.getProfile(),
-          gamificationService.getLeaderboard(),
+          gamificationService.getLeaderboard('weekly', 10),
+          gamificationService.getLeaderboard('overall', 10),
         ]);
 
         setProfile(profileData);
-        setLeaderboard(leaderboardData.leaders || []);
+        setWeeklyLeaderboard(weeklyLeaderboardData.leaders || []);
+        setOverallLeaderboard(overallLeaderboardData.leaders || []);
       } catch (err) {
         console.error('Failed to load gamification hub:', err);
         setError('Failed to load data. Please try again.');
@@ -83,7 +86,7 @@ export default function GamificationHub() {
   const progressPercent = xpPerLevel > 0 ? (xpInLevel / xpPerLevel) * 100 : 0;
   const streakDays = profile?.streakDays || 0;
   const weeklyCompletion = useMemo(() => buildWeeklyCompletion(streakDays), [streakDays]);
-  const podium = useMemo(() => leaderboard.slice(0, 3), [leaderboard]);
+  const podium = useMemo(() => overallLeaderboard.slice(0, 3), [overallLeaderboard]);
   const podiumMap = {
     1: podium[0],
     2: podium[1],
@@ -206,18 +209,18 @@ export default function GamificationHub() {
             <div className="gh-divider" />
 
             <div className="gh-leaderboard-list">
-              {!loading && leaderboard.length === 0 && (
+              {!loading && weeklyLeaderboard.length === 0 && (
                 <div className="gh-empty-block">No weekly leaderboard data yet.</div>
               )}
 
-              {leaderboard.map((entry, index) => (
+              {weeklyLeaderboard.map((entry, index) => (
                 <div key={`${entry.userId}-${entry.rank || index}`} className="gh-leaderboard-item">
                   <div className="gh-rank-circle">{entry.rank || index + 1}</div>
                   <div className="gh-leader-user">
                     <p className="gh-leader-name">{entry.name}</p>
                     <span>Level {entry.level || 1}</span>
                   </div>
-                  <p className="gh-leader-xp">{formatXp(entry.weeklyXp)} XP</p>
+                  <p className="gh-leader-xp">{formatXp(entry.weeklyXp || 0)} XP</p>
                 </div>
               ))}
             </div>
@@ -227,7 +230,7 @@ export default function GamificationHub() {
             <div className="gh-card-header">
               <div>
                 <h2>Top 3 Podium</h2>
-                <p>This week&apos;s front-runners.</p>
+                <p>Overall front-runners by total XP.</p>
               </div>
               <Trophy size={18} />
             </div>
@@ -259,7 +262,7 @@ export default function GamificationHub() {
                       {entry ? (
                         <>
                           <strong>{entry.name}</strong>
-                          <span>{formatXp(entry.weeklyXp)} XP</span>
+                          <span>{formatXp(entry.xp || 0)} XP</span>
                         </>
                       ) : (
                         <span>#{place}</span>

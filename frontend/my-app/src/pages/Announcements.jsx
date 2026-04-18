@@ -85,6 +85,10 @@ export default function Announcements() {
       </div>
 
       <div className="announcements-list student-view">
+        {filteredAnnouncements.length === 0 && (
+          <p className="empty-announcements-text">There are no announcements right now.</p>
+        )}
+
         {filteredAnnouncements.map((announcement) => {
           const infoColor = categoryDisplayInfo[announcement.category]?.color || 'grey';
           return (

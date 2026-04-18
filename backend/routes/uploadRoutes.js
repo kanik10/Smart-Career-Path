@@ -2,6 +2,7 @@ import path from 'path';
 import express from 'express';
 import multer from 'multer';
 import { protect, admin } from '../middleware/authMiddleware.js';
+import { uploadCourseCertificate, getCourseCertificate } from '../controllers/userController.js';
 
 const router = express.Router();
 
@@ -17,6 +18,22 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage });
+const certificateUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 },
+});
+
+const handleCertificateUpload = (req, res, next) => {
+  certificateUpload.single('file')(req, res, (error) => {
+    if (!error) return next();
+
+    if (error.code === 'LIMIT_FILE_SIZE') {
+      return res.status(400).json({ message: 'File size must be 5MB or less' });
+    }
+
+    return res.status(400).json({ message: error.message || 'File upload failed' });
+  });
+};
 
 router.post('/profile', protect, upload.single('file'), (req, res) => {
   res.send({
@@ -34,5 +51,9 @@ router.post('/', protect, admin, upload.single('file'), (req, res) => {
     path: `/${req.file.path.replace(/\\/g, "/")}`, // Format path for web
   });
 });
+
+// Certificate upload/view fallback routes.
+router.post('/certificate', protect, handleCertificateUpload, uploadCourseCertificate);
+router.get('/certificate/:courseId', protect, getCourseCertificate);
 
 export default router;

@@ -12,6 +12,7 @@
   min-height: calc(100vh - 78px);
   padding: 20px;
   background: linear-gradient(180deg, #d7e5df 0%, #deebe6 35%, #dce9e4 100%);
+  font-family: 'Poppins', sans-serif;
 }
 
 .gamification-hub {

@@ -1,6 +1,6 @@
 // src/pages/Resources.jsx
 
-import React, { useState, useEffect } from 'react';
+import React, { useMemo, useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Clock, User, Download, FileText } from 'lucide-react';
@@ -10,9 +10,43 @@ import './Resources.css';
 import { toBackendUrl } from '../utils/backendUrl';
 
 // Sub-component for interactive Course cards
-function CourseCard({ course, userData, onEnroll, onComplete, onDrop }) {
+function CourseCard({
+  course,
+  userData,
+  hasCertificate,
+  uploadingCertificate,
+  onEnroll,
+  onComplete,
+  onDrop,
+  onUploadCertificate,
+}) {
   const isEnrolled = userData.enrolledCourses?.includes(course._id);
   const isCompleted = userData.completedCourses?.includes(course._id);
+  const certificateInputRef = useRef(null);
+
+  const handleUploadClick = () => {
+    certificateInputRef.current?.click();
+  };
+
+  const handleCertificateSelected = async (event) => {
+    const selectedCertificate = event.target.files?.[0];
+    if (!selectedCertificate) return;
+
+    if (selectedCertificate.type !== 'application/pdf') {
+      alert('Only PDF files are allowed');
+      event.target.value = '';
+      return;
+    }
+
+    if (selectedCertificate.size > 5 * 1024 * 1024) {
+      alert('Certificate PDF must be 5MB or less');
+      event.target.value = '';
+      return;
+    }
+
+    await onUploadCertificate(course._id, selectedCertificate);
+    event.target.value = '';
+  };
 
   return (
     <div className="course-card">
@@ -31,7 +65,27 @@ function CourseCard({ course, userData, onEnroll, onComplete, onDrop }) {
           <div className="enrolled-actions">
             <a href={course.url} target="_blank" rel="noopener noreferrer" className="btn-continue">Continue Learning</a>
             <div className="enrolled-buttons">
-              <button onClick={() => onComplete(course._id)} className="btn-complete">Mark as Completed</button>
+              {hasCertificate ? (
+                <button onClick={() => onComplete(course._id)} className="btn-complete">Mark as Completed</button>
+              ) : (
+                <div className="certificate-upload-box">
+                  <input
+                    ref={certificateInputRef}
+                    type="file"
+                    accept="application/pdf"
+                    className="certificate-file-input-hidden"
+                    onChange={handleCertificateSelected}
+                  />
+                  <button
+                    className="btn-complete"
+                    type="button"
+                    onClick={handleUploadClick}
+                    disabled={uploadingCertificate}
+                  >
+                    {uploadingCertificate ? 'Uploading...' : 'Upload Certificate PDF'}
+                  </button>
+                </div>
+              )}
               <button onClick={() => onDrop(course._id)} className="btn-drop">Drop Course</button>
             </div>
           </div>
@@ -76,13 +130,15 @@ const DOMAIN_OPTIONS = {
 export default function Resources() {
   const [activeTab, setActiveTab] = useState('courses');
   const [resources, setResources] = useState([]);
-  const [userData, setUserData] = useState({ enrolledCourses: [], completedCourses: [] });
+  const [userData, setUserData] = useState({ enrolledCourses: [], completedCourses: [], courseCertificates: [] });
+  const [uploadingCertificates, setUploadingCertificates] = useState({});
   const [domainFilter, setDomainFilter] = useState('all');
   const [careerPath, setCareerPath] = useState(null);
   const [subDomain, setSubDomain] = useState(null);
   const [subDomainReason, setSubDomainReason] = useState(null);
   const [isChangingDomain, setIsChangingDomain] = useState(false);
   const [isRetakingChat, setIsRetakingChat] = useState(false);
+  const hasAttemptedDomainRecoveryRef = useRef(false);
   const navigate = useNavigate();
 
   const fetchAllData = async () => {
@@ -94,16 +150,63 @@ export default function Resources() {
       }
       const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
       
-      const profileRes = await axios.get('http://localhost:5000/api/users/profile', config);
+      const profileRes = await axios.get(toBackendUrl('/api/users/profile'), config);
       const profileData = profileRes.data;
+      const storedUserInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+      const profileSubDomain =
+        profileData.subDomain ||
+        profileData.subdomain ||
+        profileData.sub_domain ||
+        null;
+      const fallbackSubDomain = storedUserInfo.subDomain || null;
+      const effectiveSubDomain = profileSubDomain || fallbackSubDomain;
+
       const { careerPath, enrolledCourses, completedCourses } = profileData;
       setCareerPath(careerPath || null);
-      setUserData({ enrolledCourses, completedCourses });
-      setSubDomain(profileData.subDomain || null);
-      setSubDomainReason(profileData.subDomainReason || null);
+      setUserData({
+        enrolledCourses: enrolledCourses || [],
+        completedCourses: completedCourses || [],
+        courseCertificates: profileData.courseCertificates || [],
+      });
+      setSubDomain(effectiveSubDomain || null);
+      if (Object.prototype.hasOwnProperty.call(profileData, 'subDomainReason')) {
+        setSubDomainReason(profileData.subDomainReason || null);
+      }
+
+      if (
+        !profileSubDomain &&
+        fallbackSubDomain &&
+        !hasAttemptedDomainRecoveryRef.current
+      ) {
+        hasAttemptedDomainRecoveryRef.current = true;
+        try {
+          await axios.put(
+            toBackendUrl('/api/users/subdomain'),
+            { subDomain: fallbackSubDomain, subDomainReason: storedUserInfo.subDomainReason || null },
+            config
+          );
+        } catch {
+          try {
+            await axios.put(
+              toBackendUrl('/api/users/profile'),
+              { subDomain: fallbackSubDomain, subDomainReason: storedUserInfo.subDomainReason || null },
+              config
+            );
+          } catch {
+            // Ignore recovery errors; UI will still use fallback domain from local storage.
+          }
+        }
+      }
 
       if (careerPath) {
-        const resourcesRes = await axios.get(`http://localhost:5000/api/resources?careerPath=${careerPath}${(profileData.subDomain || null) ? `&domain=${encodeURIComponent(profileData.subDomain)}` : ''}`, config);
+        const preferredDomain = effectiveSubDomain || subDomain || '';
+        const priorityQuery = preferredDomain
+          ? `&prioritizeDomain=${encodeURIComponent(preferredDomain)}`
+          : '';
+        const resourcesRes = await axios.get(
+          `${toBackendUrl('/api/resources')}?careerPath=${encodeURIComponent(careerPath)}${priorityQuery}`,
+          config
+        );
         setResources(resourcesRes.data);
       }
     } catch (error) { console.error("Failed to fetch resources", error); }
@@ -117,7 +220,7 @@ export default function Resources() {
     try {
       const userInfo = JSON.parse(localStorage.getItem('userInfo'));
       const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-      await axios.post('http://localhost:5000/api/users/courses/enroll', { courseId }, config);
+      await axios.post(toBackendUrl('/api/users/courses/enroll'), { courseId }, config);
       window.open(courseUrl, '_blank');
       fetchAllData();
     } catch (error) { 
@@ -130,9 +233,45 @@ export default function Resources() {
     try {
       const userInfo = JSON.parse(localStorage.getItem('userInfo'));
       const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-      await axios.post('http://localhost:5000/api/users/courses/complete', { courseId }, config);
+      await axios.post(toBackendUrl('/api/users/courses/complete'), { courseId }, config);
       fetchAllData();
     } catch (error) { console.error("Failed to mark as complete", error); }
+  };
+
+  const handleUploadCertificate = async (courseId, file) => {
+    try {
+      setUploadingCertificates((prev) => ({ ...prev, [courseId]: true }));
+      const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+      const formData = new FormData();
+      formData.append('courseId', courseId);
+      formData.append('file', file);
+
+      const config = {
+        headers: {
+          Authorization: `Bearer ${userInfo.token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      };
+
+      try {
+        await axios.post(toBackendUrl('/api/users/courses/certificate'), formData, config);
+      } catch (primaryError) {
+        if (primaryError.response?.status !== 404) {
+          throw primaryError;
+        }
+
+        await axios.post(toBackendUrl('/api/upload/certificate'), formData, config);
+      }
+
+      await fetchAllData();
+      return true;
+    } catch (error) {
+      console.error('Failed to upload certificate', error);
+      alert(error.response?.data?.message || 'Failed to upload certificate PDF');
+      return false;
+    } finally {
+      setUploadingCertificates((prev) => ({ ...prev, [courseId]: false }));
+    }
   };
 
   const handleDrop = async (courseId) => {
@@ -140,7 +279,7 @@ export default function Resources() {
       try {
         const userInfo = JSON.parse(localStorage.getItem('userInfo'));
         const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-        await axios.delete(`http://localhost:5000/api/users/courses/drop/${courseId}`, config);
+        await axios.delete(toBackendUrl(`/api/users/courses/drop/${courseId}`), config);
         fetchAllData();
       } catch (error) { console.error("Failed to drop course", error); }
     }
@@ -149,15 +288,42 @@ export default function Resources() {
   async function handleDomainChange(newDomain) {
     try {
       const token = JSON.parse(localStorage.getItem('userInfo')).token;
-      await fetch(toBackendUrl('/api/users/subdomain'), {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ subDomain: newDomain, subDomainReason: null }),
-      });
+      const payload = { subDomain: newDomain, subDomainReason: null };
+
+      try {
+        await axios.put(toBackendUrl('/api/users/subdomain'), payload, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+      } catch (primaryError) {
+        await axios.put(toBackendUrl('/api/users/profile'), payload, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+      }
+
+      try {
+        await axios.get(toBackendUrl('/api/users/profile'), {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+      } catch {
+        // ignore verification read failure
+      }
+
       setSubDomain(newDomain);
+      const stored = JSON.parse(localStorage.getItem('userInfo') || '{}');
+      localStorage.setItem(
+        'userInfo',
+        JSON.stringify({
+          ...stored,
+          subDomain: newDomain,
+          subDomainReason: null,
+        })
+      );
       setIsChangingDomain(false);
       fetchAllData();
     } catch (err) {
@@ -168,28 +334,81 @@ export default function Resources() {
   async function handleClearDomain() {
     try {
       const token = JSON.parse(localStorage.getItem('userInfo')).token;
-      await fetch(toBackendUrl('/api/users/subdomain'), {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ subDomain: null, subDomainReason: null }),
-      });
+      const payload = { subDomain: null, subDomainReason: null };
+
+      try {
+        await axios.put(toBackendUrl('/api/users/subdomain'), payload, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+      } catch (primaryError) {
+        await axios.put(toBackendUrl('/api/users/profile'), payload, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+      }
+
+      try {
+        await axios.get(toBackendUrl('/api/users/profile'), {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+      } catch {
+        // ignore verification read failure
+      }
+
       setSubDomain(null);
+      const stored = JSON.parse(localStorage.getItem('userInfo') || '{}');
+      localStorage.setItem(
+        'userInfo',
+        JSON.stringify({
+          ...stored,
+          subDomain: null,
+          subDomainReason: null,
+        })
+      );
       setIsChangingDomain(false);
     } catch (err) {
       console.error('Failed to clear domain', err);
+      alert(err?.message || 'Failed to clear domain');
     }
   }
   
-  const filteredResources = resources.filter(resource => {
-    return domainFilter === 'all' || resource.domain === domainFilter;
-  });
+  const filteredResources = useMemo(() => {
+    const byFilter = resources.filter((resource) => {
+      return domainFilter === 'all' || resource.domain === domainFilter;
+    });
+
+    if (domainFilter !== 'all' || !subDomain) {
+      return byFilter;
+    }
+
+    const normalizedSubDomain = String(subDomain).trim().toLowerCase();
+    return [...byFilter].sort((a, b) => {
+      const aPreferred = String(a.domain || '').trim().toLowerCase() === normalizedSubDomain ? 1 : 0;
+      const bPreferred = String(b.domain || '').trim().toLowerCase() === normalizedSubDomain ? 1 : 0;
+      if (aPreferred !== bPreferred) {
+        return bPreferred - aPreferred;
+      }
+      return 0;
+    });
+  }, [resources, domainFilter, subDomain]);
 
   const courses = filteredResources.filter(r => r.type === 'course');
   const materials = filteredResources.filter(r => r.type === 'material');
   const availableDomains = [...new Set(resources.map(r => r.domain))];
+  const certificateCourseMap = useMemo(() => {
+    const map = {};
+    (userData.courseCertificates || []).forEach((certificate) => {
+      if (certificate?.courseId) {
+        map[certificate.courseId] = true;
+      }
+    });
+    return map;
+  }, [userData.courseCertificates]);
 
   return (
     <div className="resources-container">
@@ -313,9 +532,12 @@ export default function Resources() {
               key={course._id}
               course={course}
               userData={userData}
+              hasCertificate={Boolean(certificateCourseMap[course._id])}
+              uploadingCertificate={Boolean(uploadingCertificates[course._id])}
               onEnroll={handleEnroll}
               onComplete={handleComplete}
               onDrop={handleDrop}
+              onUploadCertificate={handleUploadCertificate}
             />
           ))}
         </div>

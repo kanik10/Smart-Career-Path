@@ -71,9 +71,11 @@ export const gamificationService = {
   },
 
   // Get leaderboard (top students by XP)
-  getLeaderboard: async () => {
+  getLeaderboard: async (period = 'weekly', limit = 10) => {
     try {
-      const response = await apiClient.get('/leaderboard');
+      const response = await apiClient.get('/leaderboard', {
+        params: { period, limit },
+      });
       return response.data;
     } catch (error) {
       handleError(error);

@@ -46,7 +46,7 @@ export default function AdminAnnouncements() {
   useEffect(() => {
     const userInfo = JSON.parse(localStorage.getItem('userInfo'));
     if (!userInfo || !userInfo.token || !userInfo.isAdmin) {
-      navigate('/login');
+        navigate('/admin');
       return;
     }
     fetchAnnouncements();

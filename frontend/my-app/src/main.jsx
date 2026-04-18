@@ -9,6 +9,7 @@ import './pages/Dashboard.css';
 import './pages/Profile.css';
 import './pages/AdminResources.css';
 import './pages/Resources.css'; 
+import './pages/AdminStudentProgress.css';
 import { BACKEND_ORIGIN } from './utils/backendUrl';
 
 if (BACKEND_ORIGIN) {

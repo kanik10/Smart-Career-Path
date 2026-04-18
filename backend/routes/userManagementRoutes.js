@@ -5,7 +5,8 @@ import {
   getUsers, 
   updateUserStatus, 
   resetUserPassword,
-  updateUserCareerPathByAdmin // 1. Import new function
+  updateUserCareerPathByAdmin, // 1. Import new function
+  getStudentProgressList
 } from '../controllers/userManagementController.js';
 import { protect, admin } from '../middleware/authMiddleware.js';
 
@@ -15,6 +16,7 @@ const router = express.Router();
 router.use(protect, admin);
 
 router.route('/').get(getUsers);
+router.route('/student-progress').get(getStudentProgressList);
 router.route('/:id/status').patch(updateUserStatus);
 router.route('/:id/reset-password').post(resetUserPassword);
 router.route('/:id/career-path').put(updateUserCareerPathByAdmin); // 2. Add new route

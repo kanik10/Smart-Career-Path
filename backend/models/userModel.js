@@ -13,6 +13,8 @@ const userSchema = mongoose.Schema({
   status: { type: String, default: 'active', enum: ['active', 'inactive'] },
   
   careerPath: { type: String, default: null },
+  subDomain: { type: String, default: null },
+  subDomainReason: { type: String, default: null },
   profileImage: { type: String, default: '' },
   skills: { type: [String], default: [] },
   workExperience: { type: [String], default: [] },
@@ -29,6 +31,19 @@ const userSchema = mongoose.Schema({
   completedCourses: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Resource'
+  }],
+  courseCertificates: [{
+    courseId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Resource',
+      required: true,
+    },
+    courseTitle: { type: String, default: '' },
+    fileName: { type: String, required: true },
+    mimeType: { type: String, required: true },
+    fileSize: { type: Number, required: true },
+    fileData: { type: Buffer, required: true },
+    uploadedAt: { type: Date, default: Date.now },
   }],
 }, {
   timestamps: true,

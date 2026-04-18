@@ -4,11 +4,11 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev": "nodemon --env-file=.env server.js",
+    "dev": "nodemon server.js",
     "start": "node server.js",
-    "data:import": "node --env-file=.env seeder.js data/all_resources.json",
-    "data:destroy": "node --env-file=.env seeder.js -d",
-    "fix:gamification-data": "node --env-file=.env scripts/fixGamificationData.js"
+    "data:import": "node seeder.js data/all_resources.json",
+    "data:destroy": "node seeder.js -d",
+    "fix:gamification-data": "node scripts/fixGamificationData.js"
   },
   "keywords": [],
   "author": "",
@@ -25,6 +25,7 @@
     "mongodb": "^6.20.0",
     "mongoose": "^8.18.3",
     "multer": "^2.0.2",
+    "nodemailer": "^7.0.9",
     "pdf-parse": "^2.4.5"
   },
   "devDependencies": {

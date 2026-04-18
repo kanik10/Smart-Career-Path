@@ -2,7 +2,7 @@
 
 import path from 'path';
 import express from 'express';
-// import dotenv from 'dotenv'; // REMOVED - The npm script handles this now
+import dotenv from 'dotenv';
 import cors from 'cors';
 import mongoose from 'mongoose';
 import userRoutes from './routes/userRoutes.js';
@@ -18,7 +18,7 @@ import atsRoutes from './routes/atsRoutes.js';
 import groqRoutes from './routes/groqRoutes.js';
 import gamificationRoutes from './routes/gamificationRoutes.js';
 
-// dotenv.config(); // REMOVED - This is no longer needed
+dotenv.config();
 
 const app = express();
 app.use(cors());

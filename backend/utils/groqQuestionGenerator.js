@@ -1,8 +1,13 @@
 import { Groq } from 'groq-sdk';
 
-const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY,
-});
+const getGroqClient = () => {
+  const apiKey = process.env.GROQ_API_KEY;
+  if (!apiKey) {
+    throw new Error('GROQ_API_KEY is missing in backend/.env');
+  }
+
+  return new Groq({ apiKey });
+};
 
 // Domain-specific context for questions
 const domainContexts = {
@@ -128,6 +133,7 @@ const buildBossFallbackByDomain = (domain, topic) => {
 // Sprint Quiz: 10 timed MCQs (30-60 seconds total)
 export const generateSprintQuestions = async (domain, topic) => {
   const context = domainContexts[domain];
+  const groq = getGroqClient();
 
   const prompt = `Generate 5 multiple-choice questions for a "Sprint Quiz" game focused on the topic "${topic}" in the context of "${domain}".
 Context: ${context.description}
@@ -235,6 +241,7 @@ Return ONLY valid JSON, no markdown, no extra text.`;
 // Flashcards: 10 concept cards (term + definition)
 export const generateFlashcards = async (domain, topic) => {
   const context = domainContexts[domain];
+  const groq = getGroqClient();
 
   const prompt = `Generate 8 flashcard pairs for the topic "${topic}" in the context of "${domain}".
 Context: ${context.description}
@@ -288,6 +295,7 @@ Return ONLY valid JSON, no markdown, no extra text.`;
 // Each phase has questions with increasing difficulty
 export const generateBossBattleQuestions = async (domain, topic) => {
   const context = domainContexts[domain];
+  const groq = getGroqClient();
 
   const placementsAptitudeGuidance =
     domain === 'placements'
@@ -369,6 +377,7 @@ Return ONLY valid JSON, no markdown, no extra text.`;
 // Spin Wheel: 5 quick MCQs from a spun topic
 export const generateSpinQuestions = async (domain, spinTopic) => {
   const context = domainContexts[domain];
+  const groq = getGroqClient();
 
   const prompt = `Generate 5 quick multiple-choice questions on "${spinTopic}" for a spin-the-wheel game in "${domain}".
 Context: ${context.description}
@@ -426,6 +435,7 @@ Return ONLY valid JSON, no markdown, no extra text.`;
 // Utility: Generate a list of topics for a domain and stage
 // (This helps frontend populate the spin wheel)
 export const generateDomainTopics = async (domain, stageId) => {
+  const groq = getGroqClient();
   const stageNames = {
     1: 'Fundamentals',
     2: 'Intermediate',

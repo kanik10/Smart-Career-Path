@@ -2,12 +2,13 @@
 
 import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom'; // Import useLocation
 import vppcoeLogo from '../assets/vppcoe-logo.png';
-import { LayoutDashboard, Megaphone, BookCopy, Users, LogOut } from 'lucide-react';
+import { LayoutDashboard, ListChecks, Megaphone, BookCopy, Users, LogOut } from 'lucide-react';
 import { useState } from 'react';
 
 // Corrected admin navigation paths
 const navItems = [
   { path: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { path: '/admin/student-progress', label: 'Student Progress', icon: ListChecks },
   { path: '/admin/announcements', label: 'Announcements', icon: Megaphone },
   {
     path: '/admin/resources', // Base path for checking active state
@@ -28,8 +29,8 @@ export default function AdminLayout() {
   const [openSubmenu, setOpenSubmenu] = useState(null);
 
   const handleLogout = () => {
-    console.log('Admin logged out');
-    navigate('/login');
+    localStorage.removeItem('userInfo');
+    navigate('/admin');
   };
 
   const handleNavClick = (label) => {

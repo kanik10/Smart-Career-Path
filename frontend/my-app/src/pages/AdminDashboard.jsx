@@ -20,7 +20,7 @@ export default function AdminDashboard() {
       try {
         const userInfo = JSON.parse(localStorage.getItem('userInfo'));
         if (!userInfo || !userInfo.token || !userInfo.isAdmin) {
-          navigate('/login');
+          navigate('/admin');
           return;
         }
         const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };

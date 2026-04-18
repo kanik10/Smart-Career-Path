@@ -27,7 +27,7 @@ export default function AdminResourceCategoryPage() {
     try {
       const userInfo = JSON.parse(localStorage.getItem('userInfo'));
       if (!userInfo || !userInfo.token) {
-        navigate('/login');
+        navigate('/admin');
         return;
       }
       const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };

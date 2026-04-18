@@ -115,6 +115,14 @@
   border-radius: 8px;
 }
 
+.detail-item select {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: #f8f9fa;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+}
+
 .tags-container {
   display: flex;
   flex-wrap: wrap;

@@ -3,11 +3,27 @@ import Resource from '../models/resourceModel.js';
 import asyncHandler from 'express-async-handler';
 
 export const getResources = asyncHandler(async (req, res) => {
-  const { careerPath, type } = req.query;
+  const { careerPath, type, domain, prioritizeDomain } = req.query;
   const filter = {};
   if (careerPath) filter.careerPath = careerPath;
   if (type) filter.type = type;
+  if (domain) filter.domain = domain;
+
   const resources = await Resource.find(filter).sort({ createdAt: -1 });
+
+  if (prioritizeDomain) {
+    const normalizedPreferred = String(prioritizeDomain).trim().toLowerCase();
+    const prioritized = [...resources].sort((a, b) => {
+      const aPreferred = String(a.domain || '').trim().toLowerCase() === normalizedPreferred ? 1 : 0;
+      const bPreferred = String(b.domain || '').trim().toLowerCase() === normalizedPreferred ? 1 : 0;
+      if (aPreferred !== bPreferred) {
+        return bPreferred - aPreferred;
+      }
+      return 0;
+    });
+    return res.json(prioritized);
+  }
+
   res.json(resources);
 });
 

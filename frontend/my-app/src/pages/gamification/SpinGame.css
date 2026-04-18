@@ -8,7 +8,7 @@
     linear-gradient(180deg, #f4f09e 0%, #ece58d 100%);
   background-size: 9px 9px, 10px 10px, 100% 100%;
   padding: 18px;
-  font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+  font-family: 'Poppins', sans-serif;
 }
 
 .spin-intro-overlay {
@@ -224,6 +224,7 @@
   line-height: 1.25;
   font-weight: 700;
   text-transform: uppercase;
+  font-family: 'Poppins', sans-serif;
 }
 
 .spin-option-grid {
@@ -248,6 +249,7 @@
   font-weight: 800;
   cursor: pointer;
   transition: transform 0.16s ease, filter 0.16s ease;
+  font-family: 'Poppins', sans-serif;
 }
 
 .spin-option-btn:hover:not(:disabled) {

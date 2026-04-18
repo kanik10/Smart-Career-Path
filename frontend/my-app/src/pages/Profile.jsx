@@ -6,6 +6,44 @@ import axios from 'axios';
 import { Edit, Save, X, Upload, ExternalLink, Linkedin, Github } from 'lucide-react';
 import { toBackendUrl } from '../utils/backendUrl';
 
+const formatDateDdMmYyyy = (value) => {
+  if (!value) return '-';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '-';
+  return date.toLocaleDateString('en-GB');
+};
+
+const TRACK_OPTIONS = [
+  { value: 'placements', label: 'Placement' },
+  { value: 'higher-studies', label: 'Higher Studies' },
+  { value: 'entrepreneurship', label: 'Entrepreneurship' },
+];
+
+const SUBDOMAIN_OPTIONS = {
+  placements: ['DSA', 'Aptitude', 'Fullstack', 'ML', 'Frontend', 'Backend', 'DevOps', 'Cybersecurity', 'UX Design', 'Product Management'],
+  'higher-studies': ['IELTS', 'GRE', 'GATE', 'MBA', 'MS Computer Science', 'MS Data Science', 'MS Cybersecurity', 'Research & PhD'],
+  entrepreneurship: ['Startup Fundamentals', 'Business & Finance', 'Marketing & Growth', 'Product & Design', 'Legal & Operations', 'Fundraising & Pitching'],
+};
+
+const formatTrackLabel = (track) => {
+  return TRACK_OPTIONS.find((option) => option.value === track)?.label || '-';
+};
+
+const normalizeProfileData = (rawData, storedUserInfo = {}) => {
+  const next = { ...(rawData || {}) };
+
+  next.careerPath = next.careerPath || next.career_path || storedUserInfo.careerPath || null;
+  next.subDomain = next.subDomain || next.subdomain || next.sub_domain || storedUserInfo.subDomain || null;
+  next.subDomainReason =
+    next.subDomainReason ||
+    next.subdomainReason ||
+    next.sub_domain_reason ||
+    storedUserInfo.subDomainReason ||
+    null;
+
+  return next;
+};
+
 export default function Profile() {
   const [user, setUser] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -36,8 +74,9 @@ export default function Profile() {
       try {
         const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
         const { data } = await axios.get('http://localhost:5000/api/users/profile', config);
-        setUser(data);
-        setEditData(data);
+        const normalizedData = normalizeProfileData(data, userInfo);
+        setUser(normalizedData);
+        setEditData(normalizedData);
         setLoading(false);
       } catch (error) {
         console.error('Failed to fetch profile', error);
@@ -59,6 +98,8 @@ export default function Profile() {
         ...stored,
         name: data.name,
         careerPath: data.careerPath,
+        subDomain: data.subDomain || null,
+        subDomainReason: data.subDomainReason || null,
         profileImage: data.profileImage || '',
       }));
       setIsEditing(false);
@@ -118,6 +159,36 @@ export default function Profile() {
   const handleCancel = () => {
     setEditData(user);
     setIsEditing(false);
+  };
+
+  const handleTrackChange = (nextTrack) => {
+    setEditData((prev) => ({
+      ...prev,
+      careerPath: nextTrack || null,
+      subDomain: null,
+      subDomainReason: null,
+    }));
+  };
+
+  const handleViewCertificate = async (courseId, fileName) => {
+    try {
+      const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+      if (!userInfo?.token) {
+        navigate('/login');
+        return;
+      }
+
+      const response = await axios.get(`http://localhost:5000/api/users/courses/certificate/${courseId}`, {
+        headers: { Authorization: `Bearer ${userInfo.token}` },
+        responseType: 'blob',
+      });
+
+      const blobUrl = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
+      window.open(blobUrl, '_blank', 'noopener,noreferrer');
+      setTimeout(() => window.URL.revokeObjectURL(blobUrl), 60_000);
+    } catch (error) {
+      console.error('Failed to open certificate', error);
+    }
   };
   
   // --- Skill and Certification helpers remain the same ---
@@ -208,7 +279,40 @@ export default function Profile() {
             <div className="detail-item"><label>Email</label><p>{user.email}</p></div>
             <div className="detail-item"><label>Department</label><p>{user.department}</p></div>
             <div className="detail-item"><label>Current Semester</label><p>{user.semester}</p></div>
-            <div className="detail-item"><label>Date of Birth</label><p>{new Date(user.dateOfBirth).toLocaleDateString()}</p></div>
+            <div className="detail-item"><label>Date of Birth</label><p>{formatDateDdMmYyyy(user.dateOfBirth)}</p></div>
+            <div className="detail-item">
+              <label>Track</label>
+              {isEditing ? (
+                <select
+                  value={editData.careerPath || ''}
+                  onChange={(event) => handleTrackChange(event.target.value || null)}
+                >
+                  <option value="">Select track</option>
+                  {TRACK_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>{option.label}</option>
+                  ))}
+                </select>
+              ) : (
+                <p>{formatTrackLabel(currentData.careerPath)}</p>
+              )}
+            </div>
+            <div className="detail-item">
+              <label>Domain</label>
+              {isEditing ? (
+                <select
+                  value={editData.subDomain || ''}
+                  onChange={(event) => setEditData((prev) => ({ ...prev, subDomain: event.target.value || null }))}
+                  disabled={!editData.careerPath}
+                >
+                  <option value="">Select domain</option>
+                  {(SUBDOMAIN_OPTIONS[editData.careerPath] || []).map((option) => (
+                    <option key={option} value={option}>{option}</option>
+                  ))}
+                </select>
+              ) : (
+                <p>{currentData.subDomain || '-'}</p>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -290,6 +394,27 @@ export default function Profile() {
             {currentData.portfolioUrl && <a href={currentData.portfolioUrl} target="_blank" rel="noopener noreferrer">Portfolio <ExternalLink size={16}/></a>}
           </div>
         )}
+      </div>
+
+      <div className="profile-card">
+        <h2>Course Certificates</h2>
+        <div className="list-container">
+          {currentData.courseCertificates?.length ? (
+            currentData.courseCertificates.map((certificate) => (
+              <div key={certificate.courseId} className="list-item">
+                <span>{certificate.courseTitle || certificate.fileName || 'Course Certificate'}</span>
+                <button
+                  className="btn-primary"
+                  onClick={() => handleViewCertificate(certificate.courseId, certificate.fileName)}
+                >
+                  View Certificate
+                </button>
+              </div>
+            ))
+          ) : (
+            <p>No uploaded course certificates yet.</p>
+          )}
+        </div>
       </div>
 
       {isEditing && (

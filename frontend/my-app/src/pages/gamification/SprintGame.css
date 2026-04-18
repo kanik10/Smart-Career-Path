@@ -11,7 +11,7 @@
     radial-gradient(circle at 80% 70%, rgba(221, 139, 82, 0.22) 0 1px, transparent 1.3px),
     linear-gradient(180deg, #f8dab5 0%, #f3cea0 100%);
   background-size: 10px 10px, 11px 11px, 100% 100%;
-  font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+  font-family: 'Poppins', sans-serif;
 }
 
 .sprint-card {
@@ -105,6 +105,7 @@
   line-height: 1.4;
   font-weight: 700;
   text-transform: uppercase;
+  font-family: 'Poppins', sans-serif;
 }
 
 .sprint-options-grid {
@@ -130,6 +131,7 @@
   cursor: pointer;
   transition: transform 0.18s ease, filter 0.18s ease;
   white-space: normal;
+  font-family: 'Poppins', sans-serif;
 }
 
 .sprint-option-btn:hover:not(:disabled) {

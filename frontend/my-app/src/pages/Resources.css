@@ -221,9 +221,12 @@
 /* Style for the 'Complete' button */
 .enrolled-buttons {
   display: flex;
-  margin: 0 auto;
+  flex-direction: column;
+  justify-content: center;
   align-items: center;
-  gap: 3rem; /* Adds space between buttons */
+  margin: 0 auto;
+  gap: 0.9rem;
+  width: 100%;
 }
 
 .enrolled-buttons .btn-complete {
@@ -234,6 +237,7 @@
   border-radius: 8px;
   font-weight: 600;
   transition: all 0.3s ease;
+  width: min(100%, 360px);
 }
 
 .enrolled-buttons .btn-complete:hover {
@@ -251,6 +255,7 @@
   border-radius: 8px;
   font-weight: 600;
   transition: all 0.3s ease;
+  width: min(100%, 360px);
 }
 
 .enrolled-buttons .btn-drop:hover {
@@ -258,6 +263,18 @@
   color: white;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(220, 53, 69, 0.2);
+}
+
+.certificate-upload-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+}
+
+.certificate-file-input-hidden {
+  display: none;
 }
 
 /* Find and replace these rules in src/Resources.css */

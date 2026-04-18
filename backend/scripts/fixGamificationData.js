@@ -1,9 +1,12 @@
 import mongoose from 'mongoose';
+import dotenv from 'dotenv';
 import {
   GamificationProfile,
   StageProgress,
   XPLog,
 } from '../models/gamificationModel.js';
+
+dotenv.config();
 
 const XP_PER_LEVEL = 1000;
 

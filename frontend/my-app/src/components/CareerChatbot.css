@@ -289,3 +289,52 @@
   cursor: not-allowed;
   opacity: 0.6;
 }
+
+.career-chatbot-strengths {
+  margin: 12px 0;
+  padding: 12px 14px;
+  background: var(--color-background-secondary, #f5f5f5);
+  border-radius: 8px;
+  border-left: 3px solid #7F77DD;
+}
+
+.career-chatbot-strengths-label,
+.career-chatbot-next-step-label {
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #7F77DD;
+  margin: 0 0 6px 0;
+}
+
+.career-chatbot-strengths ul {
+  margin: 0;
+  padding-left: 16px;
+}
+
+.career-chatbot-strengths ul li {
+  font-size: 13px;
+  color: var(--color-text-primary, #222);
+  margin-bottom: 3px;
+  line-height: 1.5;
+}
+
+.career-chatbot-next-step {
+  margin: 10px 0 14px;
+  padding: 12px 14px;
+  background: #E1F5EE;
+  border-radius: 8px;
+  border-left: 3px solid #1D9E75;
+}
+
+.career-chatbot-next-step .career-chatbot-next-step-label {
+  color: #0F6E56;
+}
+
+.career-chatbot-next-step p:last-child {
+  margin: 0;
+  font-size: 13px;
+  color: #085041;
+  line-height: 1.5;
+}

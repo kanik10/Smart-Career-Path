@@ -1,158 +1,46 @@
-const DOMAIN_OPTIONS = {
-  placements: ['DSA', 'Aptitude', 'Fullstack', 'ML', 'Frontend', 'Backend', 'DevOps', 'Cybersecurity', 'UX Design', 'Product Management'],
-  'higher-studies': ['IELTS', 'GRE', 'GATE', 'MBA', 'MS Computer Science', 'MS Data Science', 'MS Cybersecurity', 'Research & PhD'],
-  entrepreneurship: ['Startup Fundamentals', 'Business & Finance', 'Marketing & Growth', 'Product & Design', 'Legal & Operations', 'Fundraising & Pitching'],
-};
-
-const MIN_USER_TURNS_FOR_RECOMMENDATION = 4;
-
-const FOLLOW_UP_QUESTIONS = {
-  placements: [
-    'Which kind of work do you enjoy most: coding logic, building UI, backend APIs, or data/model work?',
-    'Tell me one project you liked and which exact part you enjoyed most day-to-day.',
-    'Do you prefer product building speed, deep technical problem solving, or systems/infrastructure work?',
-    'What role would make you excited to work every day after graduation?',
-  ],
-  'higher-studies': [
-    'Do you prefer research-heavy study or coursework-focused programs?',
-    'Are you targeting exams in India, admissions abroad, or management studies?',
-    'Which subjects in your degree did you enjoy most and why?',
-    'Do you see yourself in industry engineering, research, or leadership roles?',
-  ],
-  entrepreneurship: [
-    'Do you enjoy idea validation with users more, or building products more?',
-    'Which startup function attracts you most right now: growth, finance, product, or operations?',
-    'Have you done any selling, pitching, or side initiative before?',
-    'If you started today, which startup responsibility would you take first?',
-  ],
-};
-
-const KEYWORD_WEIGHTS = {
-  placements: {
-    DSA: ['dsa', 'algorithm', 'problem solving', 'leetcode', 'competitive programming', 'data structure'],
-    Aptitude: ['aptitude', 'quant', 'reasoning', 'logical reasoning', 'verbal'],
-    Fullstack: ['fullstack', 'full stack', 'end to end', 'mern', 'build complete apps'],
-    ML: ['ml', 'machine learning', 'ai', 'model', 'data science', 'prediction', 'neural'],
-    Frontend: ['frontend', 'react', 'ui', 'ux', 'design', 'css', 'javascript ui'],
-    Backend: ['backend', 'api', 'server', 'database', 'node', 'express', 'sql'],
-    DevOps: ['devops', 'docker', 'kubernetes', 'ci/cd', 'aws', 'cloud', 'deployment'],
-    Cybersecurity: ['cybersecurity', 'security', 'ethical hacking', 'penetration', 'network security'],
-    'UX Design': ['ux', 'user research', 'wireframe', 'prototype', 'usability'],
-    'Product Management': ['product', 'roadmap', 'feature prioritization', 'customer problem', 'stakeholder'],
-  },
-  'higher-studies': {
-    IELTS: ['ielts', 'english test', 'language test'],
-    GRE: ['gre', 'abroad exam', 'graduate exam'],
-    GATE: ['gate', 'psu', 'mtech'],
-    MBA: ['mba', 'management', 'business school', 'leadership'],
-    'MS Computer Science': ['ms cs', 'computer science masters', 'systems', 'software engineering masters'],
-    'MS Data Science': ['data science masters', 'analytics masters', 'ml masters', 'statistics'],
-    'MS Cybersecurity': ['cybersecurity masters', 'security masters'],
-    'Research & PhD': ['research', 'paper', 'phd', 'academia', 'publication'],
-  },
-  entrepreneurship: {
-    'Startup Fundamentals': ['startup basics', 'startup', 'validate idea', 'mvp'],
-    'Business & Finance': ['finance', 'revenue', 'unit economics', 'pricing', 'cash flow'],
-    'Marketing & Growth': ['marketing', 'growth', 'acquisition', 'social media', 'sales funnel'],
-    'Product & Design': ['product', 'design', 'prototype', 'user journey', 'ux'],
-    'Legal & Operations': ['legal', 'operations', 'compliance', 'contracts', 'process'],
-    'Fundraising & Pitching': ['fundraising', 'pitch', 'investor', 'deck', 'venture capital'],
-  },
-};
-
-const countUserTurns = (messages = []) => {
-  return (messages || []).filter((item) => item?.role === 'user' && item?.content).length;
-};
-
-const collectUserText = (messages = []) => {
-  return (messages || [])
-    .filter((item) => item?.role === 'user' && item?.content)
-    .map((item) => String(item.content).toLowerCase())
-    .join(' ');
-};
-
-const askAdaptiveFollowUp = (careerPath, userTurns) => {
-  const pool = FOLLOW_UP_QUESTIONS[careerPath] || FOLLOW_UP_QUESTIONS.placements;
-  return pool[Math.min(userTurns, pool.length - 1)];
-};
-
-const scoreOptions = (careerPath, userText) => {
-  const optionKeywords = KEYWORD_WEIGHTS[careerPath] || KEYWORD_WEIGHTS.placements;
-
-  return Object.entries(optionKeywords).map(([option, keywords]) => {
-    let score = 0;
-    const matched = [];
-
-    keywords.forEach((keyword) => {
-      if (userText.includes(keyword.toLowerCase())) {
-        score += keyword.includes(' ') ? 3 : 2;
-        matched.push(keyword);
-      }
-    });
-
-    return { option, score, matched };
-  });
-};
-
-const fallbackByPath = {
-  placements: 'Fullstack',
-  'higher-studies': 'GRE',
-  entrepreneurship: 'Startup Fundamentals',
-};
-
-const buildRecommendation = (careerPath, messages = []) => {
-  const options = DOMAIN_OPTIONS[careerPath] || DOMAIN_OPTIONS.placements;
-  const userText = collectUserText(messages);
-  const scored = scoreOptions(careerPath, userText).sort((a, b) => b.score - a.score);
-
-  const top = scored[0];
-  const second = scored[1] || { score: 0 };
-
-  let selected = top?.option || fallbackByPath[careerPath] || options[0];
-  if (!selected || !options.includes(selected)) {
-    selected = fallbackByPath[careerPath] || options[0];
-  }
-
-  const evidenceGap = Math.max(0, (top?.score || 0) - (second?.score || 0));
-  const base = 58 + Math.min(20, (top?.score || 0) * 2);
-  const gapBonus = Math.min(14, evidenceGap * 2);
-  const confidence = Math.max(55, Math.min(95, Math.round(base + gapBonus)));
-
-  const matchedEvidence = (top?.matched || []).slice(0, 3);
-  const reason = matchedEvidence.length
-    ? `You consistently mentioned ${matchedEvidence.join(', ')}, which aligns strongly with ${selected}.`
-    : `${selected} is currently the best fit from your answers and preferred working style.`;
-
-  return {
-    subDomain: selected,
-    confidence,
-    reason,
-  };
-};
-
 export async function chatWithGroq(req, res) {
   try {
     const { messages, careerPath } = req.body;
-    const safeMessages = Array.isArray(messages) ? messages : [];
-    const safeCareerPath = DOMAIN_OPTIONS[careerPath] ? careerPath : 'placements';
-    const userTurns = countUserTurns(safeMessages);
 
-    if (userTurns < MIN_USER_TURNS_FOR_RECOMMENDATION) {
-      return res.json({
-        isRecommendation: false,
-        reply: askAdaptiveFollowUp(safeCareerPath, userTurns),
-      });
+    let systemPrompt = '';
+
+    if (careerPath === 'placements') {
+      systemPrompt = "You are a career advisor helping a CS/IT student find their ideal tech specialisation. Available domains: DSA, Aptitude, Fullstack, ML, Frontend, Backend, DevOps, Cybersecurity, UX Design, Product Management. Ask ONE short conversational question at a time. Do NOT list options or domains to the student. Start with open-ended questions about their interests, projects, and what excites them. After 5 to 7 exchanges when you are confident, output ONLY this JSON with no other text before or after it: {\"subDomain\":\"ML\",\"confidence\":85,\"reason\":\"Because you mentioned enjoying pattern recognition and building predictive models\"}";
     }
 
-    const recommendation = buildRecommendation(safeCareerPath, safeMessages);
+    if (careerPath === 'higher-studies') {
+      systemPrompt = "You are a career advisor helping a CS/IT student choose the right postgraduate path. Available domains: IELTS, GRE, GATE, MBA, MS Computer Science, MS Data Science, MS Cybersecurity, Research & PhD. Ask ONE short conversational question at a time. Do NOT list options. Start with questions about their long-term vision, research interests, and target countries. After 5 to 7 exchanges when confident, output ONLY this JSON with no other text: {\"subDomain\":\"MS Data Science\",\"confidence\":82,\"reason\":\"Because you expressed interest in research and working with large datasets abroad\"}";
+    }
+
+    if (careerPath === 'entrepreneurship') {
+      systemPrompt = "You are a career advisor helping a CS/IT student find their entrepreneurship focus. Available domains: Startup Fundamentals, Business & Finance, Marketing & Growth, Product & Design, Legal & Operations, Fundraising & Pitching. Ask ONE short conversational question at a time. Do NOT list options. Start with questions about their motivation, past ideas, and risk appetite. After 5 to 7 exchanges when confident, output ONLY this JSON with no other text: {\"subDomain\":\"Marketing & Growth\",\"confidence\":88,\"reason\":\"Because you enjoy finding customers and described past experience running social media campaigns\"}";
+    }
+
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages: [{ role: 'system', content: systemPrompt }, ...(messages || [])],
+        max_tokens: 500,
+        temperature: 0.7,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data?.error?.message || 'Groq API request failed');
+    }
 
     return res.json({
-      isRecommendation: true,
-      reply: JSON.stringify(recommendation),
+      reply: data.choices[0].message.content,
     });
   } catch (error) {
-    console.error('Chatbot Error:', error);
-    return res.status(500).json({ message: 'An error occurred while generating a response.' });
+    return res.status(500).json({ message: error.message });
   }
 }
 

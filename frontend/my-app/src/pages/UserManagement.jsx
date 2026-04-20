@@ -28,10 +28,10 @@ export default function UserManagement() {
     open: false,
     userId: '',
     userName: '',
-    oldPassword: '',
     newPassword: '',
-    showOldPassword: false,
+    confirmPassword: '',
     showNewPassword: false,
+    showConfirmPassword: false,
     loading: false,
   });
 
@@ -78,10 +78,10 @@ export default function UserManagement() {
       open: true,
       userId,
       userName,
-      oldPassword: '',
       newPassword: '',
-      showOldPassword: false,
+      confirmPassword: '',
       showNewPassword: false,
+      showConfirmPassword: false,
       loading: false,
     });
   };
@@ -91,13 +91,18 @@ export default function UserManagement() {
   };
 
   const handleResetPassword = async () => {
-    if (!passwordModal.oldPassword || !passwordModal.newPassword) {
-      alert('Please enter both old and new password');
+    if (!passwordModal.newPassword || !passwordModal.confirmPassword) {
+      alert('Please enter new password and confirm password');
       return;
     }
 
     if (passwordModal.newPassword.length < 6) {
       alert('New password must be at least 6 characters long');
+      return;
+    }
+
+    if (passwordModal.newPassword !== passwordModal.confirmPassword) {
+      alert('New password and confirm password do not match');
       return;
     }
 
@@ -108,8 +113,8 @@ export default function UserManagement() {
       const { data } = await axios.post(
         `http://localhost:5000/api/admin/users/${passwordModal.userId}/reset-password`,
         {
-          oldPassword: passwordModal.oldPassword,
           newPassword: passwordModal.newPassword,
+          confirmPassword: passwordModal.confirmPassword,
         },
         config
       );
@@ -224,30 +229,6 @@ export default function UserManagement() {
             <p className="password-modal-subtitle">Set a new password for {passwordModal.userName}.</p>
 
             <div className="password-field-group">
-              <label htmlFor="old-password">Old Password</label>
-              <div className="password-input-wrap">
-                <input
-                  id="old-password"
-                  type={passwordModal.showOldPassword ? 'text' : 'password'}
-                  value={passwordModal.oldPassword}
-                  onChange={(event) =>
-                    setPasswordModal((prev) => ({ ...prev, oldPassword: event.target.value }))
-                  }
-                  placeholder="Enter old password"
-                />
-                <button
-                  type="button"
-                  className="password-eye-btn"
-                  onClick={() =>
-                    setPasswordModal((prev) => ({ ...prev, showOldPassword: !prev.showOldPassword }))
-                  }
-                >
-                  {passwordModal.showOldPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                </button>
-              </div>
-            </div>
-
-            <div className="password-field-group">
               <label htmlFor="new-password">New Password</label>
               <div className="password-input-wrap">
                 <input
@@ -267,6 +248,30 @@ export default function UserManagement() {
                   }
                 >
                   {passwordModal.showNewPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+            </div>
+
+            <div className="password-field-group">
+              <label htmlFor="confirm-password">Confirm Password</label>
+              <div className="password-input-wrap">
+                <input
+                  id="confirm-password"
+                  type={passwordModal.showConfirmPassword ? 'text' : 'password'}
+                  value={passwordModal.confirmPassword}
+                  onChange={(event) =>
+                    setPasswordModal((prev) => ({ ...prev, confirmPassword: event.target.value }))
+                  }
+                  placeholder="Re-enter new password"
+                />
+                <button
+                  type="button"
+                  className="password-eye-btn"
+                  onClick={() =>
+                    setPasswordModal((prev) => ({ ...prev, showConfirmPassword: !prev.showConfirmPassword }))
+                  }
+                >
+                  {passwordModal.showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
             </div>

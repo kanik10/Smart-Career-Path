@@ -53,6 +53,57 @@ const normalizeCareerPath = (value) => {
   return null;
 };
 
+const SUBDOMAIN_OPTIONS_BY_TRACK = {
+  placements: ['DSA', 'Aptitude', 'Fullstack', 'ML', 'Frontend', 'Backend', 'DevOps', 'Cybersecurity', 'UX Design', 'Product Management'],
+  'higher-studies': ['IELTS', 'GRE', 'GATE', 'MBA', 'MS Computer Science', 'MS Data Science', 'MS Cybersecurity', 'Research & PhD'],
+  entrepreneurship: ['Startup Fundamentals', 'Business & Finance', 'Marketing & Growth', 'Product & Design', 'Legal & Operations', 'Fundraising & Pitching'],
+};
+
+const SUBDOMAIN_ALIAS_MAP = {
+  fullstack: 'Fullstack',
+  'full-stack': 'Fullstack',
+  'full stack': 'Fullstack',
+  frontend: 'Frontend',
+  'front-end': 'Frontend',
+  'front end': 'Frontend',
+  backend: 'Backend',
+  'back-end': 'Backend',
+  'back end': 'Backend',
+  machinelearning: 'ML',
+  'machine-learning': 'ML',
+  'machine learning': 'ML',
+  ml: 'ML',
+};
+
+const normalizeSubdomainToken = (value = '') =>
+  String(value)
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '');
+
+const normalizeSubDomainForCareerPath = (careerPath, value) => {
+  const normalizedCareerPath = normalizeCareerPath(careerPath);
+  if (!normalizedCareerPath || value === undefined || value === null || value === '') {
+    return null;
+  }
+
+  const allowedDomains = SUBDOMAIN_OPTIONS_BY_TRACK[normalizedCareerPath] || [];
+  if (!allowedDomains.length) {
+    return null;
+  }
+
+  const trimmed = String(value).trim();
+  const token = normalizeSubdomainToken(trimmed);
+  const canonicalFromAlias = SUBDOMAIN_ALIAS_MAP[trimmed.toLowerCase()] || SUBDOMAIN_ALIAS_MAP[token];
+
+  if (canonicalFromAlias && allowedDomains.includes(canonicalFromAlias)) {
+    return canonicalFromAlias;
+  }
+
+  const directMatch = allowedDomains.find((domain) => normalizeSubdomainToken(domain) === token);
+  return directMatch || null;
+};
+
 const ensureEnvAdminUserExists = async () => {
   const envAdminEmail = normalizeEmail(process.env.ADMIN_EMAIL || '');
   const envAdminPassword = process.env.ADMIN_PASSWORD || '';
@@ -190,6 +241,8 @@ export const registerUser = asyncHandler(async (req, res) => {
       isAdmin: user.isAdmin,
       profileImage: user.profileImage || '',
       careerPath: user.careerPath || null,
+      subDomain: user.subDomain || null,
+      subDomainReason: user.subDomainReason || null,
       token: generateToken(user._id),
     });
   } else {
@@ -216,6 +269,8 @@ export const loginUser = asyncHandler(async (req, res) => {
       isAdmin: user.isAdmin,
       profileImage: user.profileImage || '',
       careerPath: user.careerPath || null,
+      subDomain: user.subDomain || null,
+      subDomainReason: user.subDomainReason || null,
       token: generateToken(user._id),
     });
   } else {
@@ -255,12 +310,24 @@ export const updateUserSubDomain = asyncHandler(async (req, res) => {
 
   const nextSubDomain = req.body.subDomain;
   const nextSubDomainReason = req.body.subDomainReason;
+  const normalizedCareerPath = normalizeCareerPath(user.careerPath);
 
   if (nextSubDomain === null || nextSubDomain === '') {
     user.subDomain = null;
     user.subDomainReason = null;
   } else {
-    user.subDomain = String(nextSubDomain).trim();
+    if (!normalizedCareerPath) {
+      res.status(400);
+      throw new Error('Please select a track before saving a domain');
+    }
+
+    const canonicalSubDomain = normalizeSubDomainForCareerPath(normalizedCareerPath, nextSubDomain);
+    if (!canonicalSubDomain) {
+      res.status(400);
+      throw new Error('Invalid domain for selected track');
+    }
+
+    user.subDomain = canonicalSubDomain;
     user.subDomainReason = nextSubDomainReason
       ? String(nextSubDomainReason).trim()
       : null;
@@ -312,18 +379,38 @@ export const getUserProfile = asyncHandler(async (req, res) => {
 export const updateUserProfile = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id);
   if (user) {
+    const previousCareerPath = user.careerPath;
     const normalizedCareerPath = normalizeCareerPath(req.body.careerPath);
     if (req.body.careerPath === null) {
       user.careerPath = null;
+      user.subDomain = null;
+      user.subDomainReason = null;
     } else if (req.body.careerPath !== undefined && normalizedCareerPath) {
       user.careerPath = normalizedCareerPath;
+      if (normalizedCareerPath !== previousCareerPath) {
+        user.subDomain = null;
+        user.subDomainReason = null;
+      }
     }
+
+    const effectiveCareerPath = normalizeCareerPath(user.careerPath);
 
     if (req.body.subDomain === null || req.body.subDomain === '') {
       user.subDomain = null;
       user.subDomainReason = null;
     } else if (req.body.subDomain !== undefined) {
-      user.subDomain = String(req.body.subDomain).trim();
+      if (!effectiveCareerPath) {
+        res.status(400);
+        throw new Error('Please select a track before saving a domain');
+      }
+
+      const canonicalSubDomain = normalizeSubDomainForCareerPath(effectiveCareerPath, req.body.subDomain);
+      if (!canonicalSubDomain) {
+        res.status(400);
+        throw new Error('Invalid domain for selected track');
+      }
+
+      user.subDomain = canonicalSubDomain;
       if (req.body.subDomainReason !== undefined) {
         user.subDomainReason = req.body.subDomainReason
           ? String(req.body.subDomainReason).trim()

@@ -24,7 +24,7 @@ const KEYWORD_MAP = {
     DSA: ['dsa', 'algorithm', 'problem solving', 'leetcode', 'competitive programming'],
     Aptitude: ['aptitude', 'quant', 'reasoning', 'logical reasoning'],
     Fullstack: ['fullstack', 'full stack', 'mern', 'both frontend', 'frontend and backend', 'end to end'],
-    ML: ['ml', 'machine learning', 'ai', 'data science', 'model', 'prediction'],
+    ML: ['ml', 'machine learning', 'ai', 'data science', 'prediction'],
     Frontend: ['frontend', 'ui', 'ux', 'react', 'css'],
     Backend: ['backend', 'api', 'server', 'database', 'node', 'express'],
     DevOps: ['devops', 'docker', 'kubernetes', 'deployment', 'ci/cd', 'cloud'],
@@ -33,6 +33,8 @@ const KEYWORD_MAP = {
     'Product Management': ['product', 'roadmap', 'feature prioritization', 'stakeholder'],
   },
 };
+
+const ML_EVIDENCE_TERMS = ['ml', 'machine learning', 'ai', 'data science', 'prediction', 'neural'];
 
 const buildClientRecommendation = (conversationMessages, careerPath) => {
   const options = DOMAIN_OPTIONS[careerPath] || DOMAIN_OPTIONS.placements;
@@ -71,6 +73,15 @@ const buildClientRecommendation = (conversationMessages, careerPath) => {
     confidence,
     reason,
   };
+};
+
+const hasMlEvidence = (conversationMessages = []) => {
+  const userText = (conversationMessages || [])
+    .filter((message) => message.role === 'user')
+    .map((message) => String(message.content || '').toLowerCase())
+    .join(' ');
+
+  return ML_EVIDENCE_TERMS.some((term) => userText.includes(term));
 };
 
 const shouldOverrideRecommendation = (parsedRecommendation, fallbackRecommendation, careerPath) => {
@@ -207,17 +218,27 @@ export default function CareerChatbot({ careerPath, onComplete }) {
       const parsedRecommendation = parseRecommendation(reply);
       const fallbackRecommendation = buildClientRecommendation(payloadMessages, careerPath);
 
-      const finalRecommendation = shouldOverrideRecommendation(parsedRecommendation, fallbackRecommendation, careerPath)
+      const mlWithoutEvidence =
+        parsedRecommendation?.subDomain === 'ML' &&
+        careerPath === 'placements' &&
+        !hasMlEvidence(payloadMessages);
+
+      const finalRecommendation = shouldOverrideRecommendation(parsedRecommendation, fallbackRecommendation, careerPath) || mlWithoutEvidence
         ? fallbackRecommendation
         : parsedRecommendation;
 
       if (finalRecommendation?.subDomain) {
         setRecommendation(finalRecommendation);
+        const dynamicSummary =
+          Number.isFinite(Number(finalRecommendation.confidence))
+            ? `Based on your answers, your strongest fit is ${finalRecommendation.subDomain} (${finalRecommendation.confidence}% match).`
+            : `Based on your answers, your strongest fit is ${finalRecommendation.subDomain}.`;
+
         setMessages((prev) => [
           ...prev,
           {
             role: 'bot',
-            text: 'Based on our conversation, I think I have a good recommendation for you!',
+            text: dynamicSummary,
           },
         ]);
       } else {
@@ -261,17 +282,31 @@ export default function CareerChatbot({ careerPath, onComplete }) {
         },
       };
 
+      let saveResponse;
       try {
-        await axios.put(toBackendUrl('/api/users/subdomain'), payload, config);
+        saveResponse = await axios.put(toBackendUrl('/api/users/subdomain'), payload, config);
       } catch (primaryError) {
         // Fallback for environments still running an older backend route map.
-        await axios.put(toBackendUrl('/api/users/profile'), payload, config);
+        saveResponse = await axios.put(toBackendUrl('/api/users/profile'), payload, config);
       }
 
-      // Best-effort verification. We do not fail hard here because some deployments
-      // can return legacy profile shapes while still persisting correctly.
+      let persistedSubDomain = saveResponse?.data?.subDomain || recommendation.subDomain;
+      let persistedReason = saveResponse?.data?.subDomainReason || recommendation.reason || null;
+
+      // Best-effort verification and normalization for mixed legacy profile keys.
       try {
-        await axios.get(toBackendUrl('/api/users/profile'), config);
+        const { data: profileData } = await axios.get(toBackendUrl('/api/users/profile'), config);
+        persistedSubDomain =
+          profileData?.subDomain ||
+          profileData?.subdomain ||
+          profileData?.sub_domain ||
+          persistedSubDomain;
+
+        persistedReason =
+          profileData?.subDomainReason ||
+          profileData?.subdomainReason ||
+          profileData?.sub_domain_reason ||
+          persistedReason;
       } catch {
         // ignore verification read failure
       }
@@ -281,14 +316,14 @@ export default function CareerChatbot({ careerPath, onComplete }) {
         'userInfo',
         JSON.stringify({
           ...stored,
-          subDomain: recommendation.subDomain,
-          subDomainReason: recommendation.reason || null,
+          subDomain: persistedSubDomain || null,
+          subDomainReason: persistedReason,
         })
       );
 
       setConfirmed(true);
       if (onComplete) {
-        onComplete(recommendation.subDomain, recommendation.reason);
+        onComplete(persistedSubDomain || recommendation.subDomain, persistedReason || recommendation.reason);
       }
     } catch (error) {
       setMessages((prev) => [

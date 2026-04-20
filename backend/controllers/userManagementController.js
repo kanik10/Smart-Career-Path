@@ -83,11 +83,11 @@ export const resetUserPassword = asyncHandler(async (req, res) => {
   const user = await User.findById(req.params.id);
   if (!user) { res.status(404); throw new Error('User not found'); }
 
-  const { oldPassword, newPassword } = req.body;
+  const { newPassword, confirmPassword } = req.body;
 
-  if (!oldPassword || !newPassword) {
+  if (!newPassword || !confirmPassword) {
     res.status(400);
-    throw new Error('Old password and new password are required');
+    throw new Error('New password and confirm password are required');
   }
 
   if (newPassword.length < 6) {
@@ -95,10 +95,9 @@ export const resetUserPassword = asyncHandler(async (req, res) => {
     throw new Error('New password must be at least 6 characters long');
   }
 
-  const isOldPasswordValid = await user.matchPassword(oldPassword);
-  if (!isOldPasswordValid) {
+  if (newPassword !== confirmPassword) {
     res.status(400);
-    throw new Error('Old password is incorrect');
+    throw new Error('New password and confirm password do not match');
   }
 
   user.password = newPassword; // Pre-save hook will hash this
